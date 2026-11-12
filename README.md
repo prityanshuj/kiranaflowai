@@ -94,12 +94,12 @@ The prototype comes pre-seeded with realistic Indian FMCG batches across a pilot
 <table align="center">
   <tr>
     <td align="center" width="25%">
-      <a href="https://github.com/prityansjuj">
+      <a href="https://github.com/prityanshuj">
         <img src="https://ui-avatars.com/api/?name=Prityanshu+Jasrotia&background=0284c7&color=fff&size=100&bold=true" width="100px;" alt="Prityanshu Jasrotia"/><br />
         <sub><b>Prityanshu Jasrotia</b></sub>
       </a><br />
       <small>Lead Architecture & Full-Stack Systems</small><br />
-      <a href="https://github.com/prityansjuj"><code>@prityansjuj</code></a>
+      <a href="https://github.com/prityanshuj"><code>@prityansjuj</code></a>
     </td>
     <td align="center" width="25%">
       <a href="https://github.com/vrindagupta19">
