@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="east-river-bridge-sunrise.gif" alt="KiranaFlow AI Hero Banner" width="100%">
+</p>
 <div align="center">
 
 # 🛒 KiranaFlow AI
