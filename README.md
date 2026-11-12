@@ -4,13 +4,14 @@
 ### Smart Kirana Expiry, Wastage & Inventory Intelligence
 
 <p align="center">
-  <img src="https://img.shields.io/badge/IDEATHON-2026-059669?style=for-the-badge&logo=target&logoColor=white" alt="Ideathon 2026" />
-  <img src="https://img.shields.io/badge/TRACK-Smart%20Retail%20%26%20MSME%20Digitization-070d18?style=for-the-badge&logo=shield&logoColor=10b981" alt="Track" />
-  <img src="https://img.shields.io/badge/TEAM-FIX%20FELLAS-f97316?style=for-the-badge&logo=users&logoColor=white" alt="Team" />
+  <img src="https://img.shields.io/badge/HACKCULTURE-2026-059669?style=for-the-badge&logo=target&logoColor=white" alt="HackCulture 2026" />
+  <img src="https://img.shields.io/badge/THEME-Rural%20FMCG%20%26%20Logistics-070d18?style=for-the-badge&logo=shield&logoColor=10b981" alt="Rural FMCG & Logistics" />
+  <img src="https://img.shields.io/badge/PS%205.1-Kirana%20Dead%20Stock%20%26%20Expiry-0284c7?style=for-the-badge" alt="Problem Statement 5.1" />
+  <img src="https://img.shields.io/badge/TEAM-FIX%20FELLAS-f97316?style=for-the-badge&logo=users&logoColor=white" alt="Team FIX FELLAS" />
 </p>
 
 <p align="center">
-  <b>Eliminating silent shelf wastage and accidental expired sales through automated FIFO stock deduction, optical barcode scanning, and velocity-based expiry risk alerts.</b>
+  <b>Eliminating dead stock, silent shelf expiration, and stockouts of fast-moving goods through automated FIFO deduction, optical barcode scanning, and velocity-based expiry alerts.</b>
 </p>
 
 [Explore Features](#-core-features) • [Architecture](#-architecture--tech-stack) • [Jammu Pilot Dataset](#-jammu-pilot-dataset) • [Meet the Team](#-team-fix-fellas)
@@ -21,13 +22,13 @@
 
 ## 📌 Executive Summary
 
-Small and medium Kirana stores silently lose significant profit margins due to unnoticed shelf expiration, missing inward expiry records, and blind reordering of slow-moving FMCG stock.
+**Problem Statement 5.1 — Rural FMCG & Logistics:** *Kiranas tie up cash in dead stock while running out of what sells.* Traditional stores rely on memory to track inventory, causing working capital to get trapped in slow-moving, expiring goods while high-demand essentials run out unexpectedly.
 
-**KiranaFlow AI** transforms traditional retail counters into an active decision engine:
+**KiranaFlow AI** replaces guesswork with an offline-first, bilingual retail decision engine:
 - 📦 **Batch-Level Stock Memory:** Tracks EAN-13 barcodes, suppliers, exact shelf locations, and batch expiry dates.
 - 🧾 **Fast POS with FIFO Deduction:** Automatically deducts stock from the oldest expiring batch first while blocking expired items from checkout.
 - ⚠️ **Dual-Check Alert Radar:** Flags both missing expiry dates (staff completeness audit) and batches expiring within 7 days.
-- 📊 **Velocity & Expiry Risk Engine:** Combines daily sales speed with days of stock left to trigger front-shelf rotation and halt over-ordering.
+- 📊 **Velocity & Expiry Risk Engine:** Separates fast movers from slow movers (`Units / Day`) and calculates Days of Stock Left to prevent dead capital and stockouts.
 
 ---
 
@@ -55,6 +56,17 @@ Small and medium Kirana stores silently lose significant profit margins due to u
 ---
 
 ## 🛠 Architecture & Tech Stack
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   KiranaFlow AI Client                 │
+├─────────────────────┬───────────────────┬──────────────┤
+│    Presentation     │   Optical & Audio │  Persistence │
+│  Glassmorphic CSS3  │  MediaDevices API │ LocalStorage │
+│  Bento Grid Layout  │  Wedge Gun Hook   │  FIFO Engine │
+│  EN / हिन्दी Toggle  │   Web Audio API   │ Risk Matrix  │
+└─────────────────────┴───────────────────┴──────────────┘
+```
 
 | Layer | Technologies |
 | :--- | :--- |
@@ -92,7 +104,7 @@ The prototype comes pre-seeded with realistic Indian FMCG batches across a pilot
         <sub><b>Prityanshu Jasrotia</b></sub>
       </a><br />
       <small>Lead Architecture & Full-Stack Systems</small><br />
-      <a href="https://github.com/prityanshuj"><code>@prityansjuj</code></a>
+      <a href="https://github.com/prityanshuj"><code>@prityanshuj</code></a>
     </td>
     <td align="center" width="25%">
       <a href="https://github.com/vrindagupta19">
@@ -132,5 +144,5 @@ The prototype comes pre-seeded with realistic Indian FMCG batches across a pilot
 ---
 
 <p align="center">
-  <sub>Developed by <b>Team FIX FELLAS</b> for <b>IDEATHON 2026</b>.</sub>
+  <sub>Developed by <b>Team FIX FELLAS</b> for <b>HackCulture 2026</b> (Rural FMCG & Logistics — PS 5.1).</sub>
 </p>
