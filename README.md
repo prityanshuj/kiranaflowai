@@ -8,7 +8,8 @@
 ### Smart Kirana Expiry, Wastage & Inventory Intelligence
 
 <p align="center">
-  <img src="https://img.shields.io/badge/HACKCULTURE-2026-059669?style=for-the-badge&logo=target&logoColor=white" alt="HackCulture 2026" />
+  <img src="https://img.shields.io/badge/TECH4BHARAT-GAVS%20HACKATHON-059669?style=for-the-badge&logo=target&logoColor=white" alt="Tech4Bharat GAVS Hackathon" />
+  <img src="https://img.shields.io/badge/PLATFORM-HackCulture-10b981?style=for-the-badge" alt="Platform HackCulture" />
   <img src="https://img.shields.io/badge/THEME-Rural%20FMCG%20%26%20Logistics-070d18?style=for-the-badge&logo=shield&logoColor=10b981" alt="Rural FMCG & Logistics" />
   <img src="https://img.shields.io/badge/PS%205.1-Kirana%20Dead%20Stock%20%26%20Expiry-0284c7?style=for-the-badge" alt="Problem Statement 5.1" />
   <img src="https://img.shields.io/badge/TEAM-FIX%20FELLAS-f97316?style=for-the-badge&logo=users&logoColor=white" alt="Team FIX FELLAS" />
@@ -26,10 +27,10 @@
 
 ## 📌 Executive Summary
 
-**Problem Statement 5.1 — Rural FMCG & Logistics:** *Kiranas tie up cash in dead stock while running out of what sells.* Traditional stores rely on memory to track inventory, causing working capital to get trapped in slow-moving, expiring goods while high-demand essentials run out unexpectedly.
+**Problem Statement 5.1 — Rural FMCG & Logistics:** *Kiranas tie up cash in dead stock while running out of what sells.* Traditional stores rely on memory to track inventory, causing working capital to get trapped in slow-moving, expiring goods while high-demand essentials run out unexpectedly[cite: 12].
 
 **KiranaFlow AI** replaces guesswork with an offline-first, bilingual retail decision engine:
-- 📦 **Batch-Level Stock Memory:** Tracks EAN-13 barcodes, suppliers, exact shelf locations, and batch expiry dates.
+- 📦 **Batch-Level Stock Memory:** Tracks EAN-13 barcodes, suppliers, exact shelf locations, and batch expiry dates[cite: 1].
 - 🧾 **Fast POS with FIFO Deduction:** Automatically deducts stock from the oldest expiring batch first while blocking expired items from checkout.
 - ⚠️ **Dual-Check Alert Radar:** Flags both missing expiry dates (staff completeness audit) and batches expiring within 7 days.
 - 📊 **Velocity & Expiry Risk Engine:** Separates fast movers from slow movers (`Units / Day`) and calculates Days of Stock Left to prevent dead capital and stockouts.
@@ -39,7 +40,7 @@
 ## 🚀 Core Features
 
 ### 1. 📦 Granular Batch Ledger & Completeness Check
-- **Batch-Wise Tracking:** Stores Product Name, Barcode, Supplier, Batch Code, Cost/MRP, Quantity, and Exact Rack Location (e.g., *Dairy Chiller A*, *Aisle 2 Top*).
+- **Batch-Wise Tracking:** Stores Product Name, Barcode, Supplier, Batch Code, Cost/MRP, Quantity, and Exact Rack Location (e.g., *Dairy Chiller A*, *Aisle 2 Top*)[cite: 1].
 - **Completeness Reminder:** Automatically detects batches entered without an expiry date and nudges staff to update them before checkout.
 - **Real-World Wastage Log:** Expired batches (`≤ 0 days`) are pulled from shelves via a 1-click **"Discard / Write-Off"** action to track exact wastage loss (`₹`).
 
@@ -103,12 +104,12 @@ The prototype comes pre-seeded with realistic Indian FMCG batches across a pilot
 <table align="center">
   <tr>
     <td align="center" width="25%">
-      <a href="https://github.com/prityanshuj">
+      <a href="https://github.com/prityansjuj">
         <img src="https://ui-avatars.com/api/?name=Prityanshu+Jasrotia&background=0284c7&color=fff&size=100&bold=true" width="100px;" alt="Prityanshu Jasrotia"/><br />
         <sub><b>Prityanshu Jasrotia</b></sub>
       </a><br />
       <small>Lead Architecture & Full-Stack Systems</small><br />
-      <a href="https://github.com/prityanshuj"><code>@prityanshuj</code></a>
+      <a href="https://github.com/prityansjuj"><code>@prityansjuj</code></a>
     </td>
     <td align="center" width="25%">
       <a href="https://github.com/vrindagupta19">
@@ -148,5 +149,5 @@ The prototype comes pre-seeded with realistic Indian FMCG batches across a pilot
 ---
 
 <p align="center">
-  <sub>Developed by <b>Team FIX FELLAS</b> for <b>HackCulture 2026</b> (Rural FMCG & Logistics — PS 5.1).</sub>
+  <sub>Developed by <b>Team FIX FELLAS</b> for <b>Tech4Bharat - GAVS Hackathon</b> on <b>HackCulture</b> (Rural FMCG & Logistics — PS 5.1).</sub>
 </p>
