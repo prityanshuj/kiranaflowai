@@ -1,0 +1,2823 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <title>KiranaFlow AI — Smart Kirana Expiry & Inventory Manager</title>
+
+  <!-- Google Fonts: Manrope, DM Sans, JetBrains Mono & Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@500;600;700;800&family=Manrope:wght@600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* =========================================================
+       1. LOCKED OBSIDIAN & EMERALD VISUAL SYSTEM
+       ========================================================= */
+    :root {
+      color-scheme: dark !important;
+      --bg: #070d0a;
+      --surface: rgba(12, 24, 18, 0.86);
+      --surface-solid: #0b1611;
+      --surface-card: rgba(15, 28, 22, 0.78);
+      --surface-hover: rgba(20, 38, 29, 0.94);
+      --ink: #f0f7f2;
+      --ink-muted: #8ea698;
+      --border: rgba(52, 211, 153, 0.16);
+      --border-strong: rgba(52, 211, 153, 0.36);
+      --emerald: #10b981;
+      --emerald-dark: #059669;
+      --emerald-glow: rgba(16, 185, 129, 0.28);
+      --lime: #a3e635;
+      --lime-glow: rgba(163, 230, 53, 0.32);
+      --amber: #fbbf24;
+      --rose: #f87171;
+      --cyan: #38bdf8;
+      --purple: #c084fc;
+      --shadow: 0 16px 45px rgba(0, 0, 0, 0.65);
+      --shadow-hover: 0 22px 54px rgba(0, 0, 0, 0.85);
+      --font-display: 'Manrope', 'Noto Sans Devanagari', sans-serif;
+      --font-body: 'DM Sans', 'Noto Sans Devanagari', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      color-scheme: dark !important;
+      scroll-behavior: smooth;
+      scroll-padding-top: 96px;
+      background-color: #070d0a !important;
+    }
+
+    body {
+      color-scheme: dark !important;
+      margin: 0;
+      padding-top: 86px;
+      padding-bottom: 48px;
+      background-color: #070d0a !important;
+      background-image:
+        radial-gradient(ellipse at 14% 8%, rgba(13, 43, 29, 0.95), transparent 46%),
+        radial-gradient(ellipse at 86% 20%, rgba(6, 33, 23, 0.9), transparent 48%),
+        radial-gradient(ellipse at 50% 92%, rgba(16, 185, 129, 0.14), transparent 55%) !important;
+      background-attachment: fixed !important;
+      color: var(--ink) !important;
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; outline: none; }
+    button { cursor: pointer; }
+    .font-display { font-family: var(--font-display); }
+    .font-mono { font-family: var(--font-mono); }
+
+    /* =========================================================
+       2. TWO-WAY NAVIGATION: DESKTOP TOPBAR & MOBILE DOCK
+       ========================================================= */
+    .topbar {
+      position: fixed !important;
+      inset: 0 0 auto 0 !important;
+      height: 76px !important;
+      padding: 0 clamp(16px, 4vw, 48px) !important;
+      z-index: 1200 !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--surface) !important;
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+      border-bottom: 1px solid var(--border) !important;
+      box-shadow: var(--shadow);
+      transition: all 0.4s cubic-bezier(0.2, 0.75, 0.25, 1);
+      overflow: hidden;
+    }
+
+    .topbar.is-scrolled {
+      top: 10px !important;
+      left: 50% !important;
+      right: auto !important;
+      width: min(1140px, calc(100% - 32px)) !important;
+      height: 64px !important;
+      padding: 0 clamp(14px, 2.5vw, 28px) !important;
+      transform: translateX(-50%) !important;
+      border-radius: 999px !important;
+      border: 1px solid var(--border-strong) !important;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8) !important;
+    }
+
+    .scroll-progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 2.5px;
+      width: 0%;
+      z-index: 5;
+      background: linear-gradient(90deg, var(--emerald), var(--lime));
+      box-shadow: 0 0 10px var(--emerald-glow);
+      transition: width 0.08s linear;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      box-shadow: 0 4px 16px var(--emerald-glow);
+      flex-shrink: 0;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--ink-muted);
+      font: 700 9px var(--font-mono);
+      letter-spacing: 1.4px;
+    }
+
+    /* Desktop Center Tabs */
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2vw, 26px);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-muted);
+    }
+
+    .desktop-nav a {
+      position: relative;
+      padding: 8px 6px;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .desktop-nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 100%;
+      bottom: -2px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--emerald);
+      transition: right 0.25s ease;
+    }
+
+    .desktop-nav a:hover, .desktop-nav a.is-active {
+      color: var(--emerald);
+    }
+    .desktop-nav a:hover::after, .desktop-nav a.is-active::after {
+      right: 0;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Sliding Segmented Language Pill */
+    .lang-toggle-box {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(8, 18, 13, 0.92);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      padding: 3px;
+      cursor: pointer;
+      user-select: none;
+      width: 116px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+
+    .lang-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 53px;
+      height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+      box-shadow: 0 2px 10px var(--emerald-glow);
+      transition: transform 0.28s cubic-bezier(0.2, 0.85, 0.3, 1);
+      z-index: 1;
+    }
+
+    .lang-toggle-box.is-hi .lang-slider {
+      transform: translateX(55px);
+    }
+
+    .lang-option {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      text-align: center;
+      font: 800 11px var(--font-display);
+      color: var(--ink-muted);
+      transition: color 0.25s ease;
+      line-height: 26px;
+    }
+
+    .lang-toggle-box:not(.is-hi) .lang-option.opt-en { color: #ffffff; }
+    .lang-toggle-box.is-hi .lang-option.opt-hi { color: #ffffff; }
+
+    /* Mobile Bottom Dock (Hidden on Desktop > 768px) */
+    .mobile-bottom-dock {
+      display: none;
+    }
+
+    /* Buttons */
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-weight: 800;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(115deg, var(--lime), #84cc16);
+      color: #071c10;
+      box-shadow: 0 4px 18px var(--lime-glow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--lime-glow);
+    }
+
+    .btn-ghost {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid var(--border-strong);
+      color: var(--ink);
+      box-shadow: none;
+    }
+    .btn-ghost:hover {
+      background: rgba(16, 185, 129, 0.16);
+      transform: translateY(-2px);
+    }
+
+    /* =========================================================
+       MAIN CONTAINER & HERO BANNER
+       ========================================================= */
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 16px 20px 40px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-banner {
+      position: relative;
+      overflow: hidden;
+      min-height: 245px;
+      border-radius: 24px;
+      padding: clamp(22px, 3.5vw, 40px);
+      display: flex;
+      align-items: center;
+      background-image:
+        linear-gradient(100deg, rgba(7, 13, 10, 0.96), rgba(11, 26, 18, 0.86) 58%, rgba(7, 13, 10, 0.48)),
+        url('https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1800&q=85');
+      background-size: cover;
+      background-position: center 35%;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+
+    .hero-copy {
+      max-width: 640px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--lime);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      margin-bottom: 8px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 16px;
+      height: 2px;
+      background: var(--lime);
+      box-shadow: 0 0 8px var(--lime);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(26px, 3.8vw, 44px);
+      line-height: 1.08;
+      font-weight: 900;
+      letter-spacing: -1.2px;
+      margin: 0 0 10px;
+    }
+
+    .hero-copy p {
+      color: #d8e8dc;
+      line-height: 1.6;
+      font-size: 13.5px;
+      margin: 0 0 18px;
+      max-width: 560px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* =========================================================
+       CONTINUOUS MARQUEE TELEMETRY TICKER
+       ========================================================= */
+    .offer-ticker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+      margin: 0 0 20px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: linear-gradient(100deg, rgba(9, 23, 16, 0.94), rgba(16, 38, 26, 0.94) 55%, rgba(19, 46, 32, 0.94));
+      color: #ffffff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border);
+    }
+
+    .ticker-label {
+      font: 800 10px var(--font-display);
+      letter-spacing: 1.4px;
+      color: var(--lime);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ticker-window {
+      overflow: hidden;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      width: max-content;
+      white-space: nowrap;
+      animation: tickerRun 34s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+
+    .ticker-track span {
+      font: 600 12px var(--font-body);
+      color: #ebf5ee;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ticker-track i {
+      font-style: normal;
+      color: var(--lime);
+      opacity: 0.85;
+    }
+
+    @keyframes tickerRun {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* =========================================================
+       GLASS CARDS & SPOTLIGHT CURSOR GLOW (NO 3D TILT)
+       ========================================================= */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card, .metric-card, .spotlight-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .card::before, .metric-card::before, .spotlight-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        380px circle at var(--light-x, 50%) var(--light-y, 50%),
+        rgba(16, 185, 129, 0.14),
+        transparent 65%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card:hover, .metric-card:hover, .spotlight-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card:hover::before, .metric-card:hover::before, .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .card > *, .metric-card > *, .spotlight-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-card {
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--ink-muted);
+      font: 700 10px var(--font-mono);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 2vw, 28px);
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin: 6px 0 2px;
+      color: var(--ink);
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Workspace Panels */
+    .workspace-panel {
+      display: none;
+      animation: panelFade 0.22s ease;
+    }
+    .workspace-panel.is-active {
+      display: block;
+    }
+
+    @keyframes panelFade {
+      from { opacity: 0.4; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .layout-split {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+    }
+
+    table.modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12.5px;
+    }
+
+    table.modern-table th {
+      padding: 12px 14px;
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--ink-muted);
+      font: 700 10px var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.modern-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.modern-table tr:last-child td { border-bottom: 0; }
+    table.modern-table tr:hover td { background: var(--surface-hover); }
+
+    /* Mobile Stock Cards Container (Hidden on Desktop) */
+    .mobile-stock-cards {
+      display: none;
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font: 700 10px var(--font-mono);
+      white-space: nowrap;
+    }
+    .tag-critical { background: rgba(239, 68, 68, 0.18); color: var(--rose); border: 1px solid rgba(239, 68, 68, 0.38); }
+    .tag-warning  { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.38); }
+    .tag-healthy  { background: rgba(16, 185, 129, 0.18); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.38); }
+    .tag-missing  { background: rgba(139, 92, 246, 0.18); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.38); }
+    .tag-front    { background: rgba(56, 189, 248, 0.16); color: var(--cyan); border: 1px solid rgba(56, 189, 248, 0.35); }
+
+    .btn-sm {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border-strong);
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--emerald);
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .btn-sm:hover {
+      background: var(--emerald);
+      color: #05140b;
+      transform: translateY(-1px);
+    }
+
+    .btn-sm-amber {
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, 0.42);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .btn-sm-amber:hover {
+      background: var(--amber);
+      color: #140d02;
+    }
+
+    .btn-sm-danger {
+      color: var(--rose);
+      border-color: rgba(239, 68, 68, 0.42);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .btn-sm-danger:hover {
+      background: var(--rose);
+      color: #ffffff;
+    }
+
+    /* Barcode Scanner Modal */
+    .scanner-viewport {
+      position: relative;
+      height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #030705;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .scanner-viewport video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+
+    .scanner-target-box {
+      position: absolute;
+      width: 72%;
+      height: 55%;
+      border: 2px dashed rgba(163, 230, 53, 0.85);
+      border-radius: 12px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+    }
+
+    .laser-line {
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      height: 2px;
+      background: #10b981;
+      box-shadow: 0 0 14px #10b981, 0 0 24px #a3e635;
+      animation: scanLaser 1.8s ease-in-out infinite;
+      z-index: 10;
+    }
+
+    @keyframes scanLaser {
+      0% { top: 24%; opacity: 0.45; }
+      50% { top: 76%; opacity: 1; }
+      100% { top: 24%; opacity: 0.45; }
+    }
+
+    /* Modals & Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(3, 8, 5, 0.84);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+    .modal-dialog {
+      width: min(540px, 100%);
+      background: #0b1611;
+      border: 1px solid var(--border-strong);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.88);
+      max-height: 88vh;
+      overflow-y: auto;
+      transform: scale(0.97);
+      transition: transform 0.22s ease;
+    }
+    .modal-backdrop.is-open .modal-dialog { transform: scale(1); }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font: 700 10.5px var(--font-mono);
+      color: var(--ink-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background: #102018;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 3px var(--emerald-glow);
+    }
+
+    /* Filter Pills */
+    .filter-pill {
+      padding: 7px 14px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .filter-pill:hover, .filter-pill.is-active {
+      background: var(--emerald);
+      color: #05140b;
+      border-color: var(--emerald);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 3000;
+      background: #0d1c14;
+      border: 1px solid var(--border-strong);
+      padding: 12px 18px;
+      border-radius: 14px;
+      box-shadow: var(--shadow-hover);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.28s cubic-bezier(0.2, 0.75, 0.25, 1);
+      max-width: calc(100vw - 32px);
+    }
+    #toast.is-visible { transform: translateY(0); opacity: 1; }
+
+    /* =========================================================
+       DEDICATED MOBILE ARCHITECTURE (<= 768px)
+       ========================================================= */
+    @media (max-width: 960px) {
+      .bento-grid { grid-template-columns: repeat(2, 1fr); }
+      .layout-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 72px;
+        padding-bottom: 96px !important; /* Space for fixed bottom dock */
+      }
+
+      /* Unclipped Mobile Topbar: Compact Brand + Lang Slider + Compact Scan */
+      .topbar {
+        height: 62px !important;
+        padding: 0 14px !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        transform: none !important;
+        border-radius: 0 !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+        border-top: 0 !important;
+      }
+
+      .topbar.is-scrolled {
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 62px !important;
+        padding: 0 14px !important;
+        transform: none !important;
+        border-radius: 0 !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+      }
+
+      /* Hide desktop inline nav links on mobile to prevent clipping */
+      .desktop-nav {
+        display: none !important;
+      }
+
+      .brand {
+        font-size: 15px;
+        gap: 8px;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 15px;
+      }
+      .brand small {
+        font-size: 8px;
+        letter-spacing: 1px;
+      }
+
+      .lang-toggle-box {
+        width: 94px;
+        height: 30px;
+      }
+      .lang-slider {
+        width: 42px;
+        height: 22px;
+      }
+      .lang-toggle-box.is-hi .lang-slider {
+        transform: translateX(44px);
+      }
+      .lang-option {
+        font-size: 10px;
+        line-height: 22px;
+      }
+
+      .topbar .btn-top-scan {
+        padding: 7px 11px !important;
+        font-size: 11px !important;
+        border-radius: 10px !important;
+      }
+      .topbar .btn-top-scan .scan-label-full {
+        display: none;
+      }
+
+      /* Fixed Frosted-Glass Mobile Bottom Navigation Dock */
+      .mobile-bottom-dock {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-around;
+        position: fixed;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        height: 66px;
+        z-index: 900;
+        background: rgba(10, 22, 16, 0.92);
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        border: 1px solid var(--border-strong);
+        border-radius: 22px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(16, 185, 129, 0.12);
+        padding: 0 6px;
+      }
+
+      .dock-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        background: transparent;
+        border: 0;
+        color: var(--ink-muted);
+        font: 700 10px var(--font-display);
+        padding: 6px 2px;
+        border-radius: 14px;
+        transition: color 0.2s ease, background 0.2s ease;
+      }
+
+      .dock-item.is-active {
+        color: var(--emerald);
+        background: rgba(16, 185, 129, 0.12);
+      }
+
+      .dock-item-scan {
+        position: relative;
+        top: -12px;
+        width: 54px;
+        height: 54px;
+        flex: 0 0 54px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--lime), var(--emerald));
+        color: #05160c;
+        border: 3px solid #070d0a;
+        box-shadow: 0 8px 22px var(--lime-glow);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
+        font: 900 9px var(--font-display);
+      }
+      .dock-item-scan:active {
+        transform: scale(0.94);
+      }
+
+      main {
+        padding: 12px 14px 24px;
+      }
+
+      .hero-banner {
+        min-height: auto;
+        padding: 20px 18px;
+        border-radius: 20px;
+      }
+
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .metric-card {
+        padding: 14px;
+        min-height: 102px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 16px;
+      }
+
+      /* Switch Stock Table to Zero-Overflow Stacked Cards on Mobile */
+      .table-wrap {
+        display: none !important;
+      }
+
+      .mobile-stock-cards {
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .m-stock-card {
+        background: var(--surface-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .filter-scroll-row {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+      }
+      .filter-scroll-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      #toast {
+        bottom: 88px;
+        left: 14px;
+        right: 14px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+  <!-- ================= DYNAMIC ISLAND / COMPACT TOPBAR ================= -->
+  <header class="topbar" id="masthead">
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <a href="#overview" class="brand" onclick="switchTab('overview')">
+      <div class="brand-mark">✦</div>
+      <div>
+        <div class="font-display">KIRANAFLOW <span style="color:var(--emerald)">AI</span></div>
+        <small>JAMMU MART</small>
+      </div>
+    </a>
+
+    <!-- Desktop Inline Tabs (> 768px) -->
+    <nav class="desktop-nav" id="topNav">
+      <a href="#overview" class="is-active" data-tab="overview" onclick="switchTab('overview')">
+        <i data-lucide="layout-dashboard" style="width: 15px; height: 15px;"></i>
+        <span data-i18n="navOverview">Overview</span>
+      </a>
+      <a href="#pos" data-tab="pos" onclick="switchTab('pos')">
+        <i data-lucide="shopping-cart" style="width: 15px; height: 15px;"></i>
+        <span data-i18n="navPOS">Fast Billing (POS)</span>
+      </a>
+      <a href="#stock" data-tab="stock" onclick="switchTab('stock')">
+        <i data-lucide="boxes" style="width: 15px; height: 15px;"></i>
+        <span data-i18n="navStock">Expiry & Stock</span>
+      </a>
+    </nav>
+
+    <!-- Right Controls: Sliding Language Toggle & Scan Trigger -->
+    <div class="topbar-actions">
+      <div class="lang-toggle-box" id="langToggle" onclick="toggleLanguage()" title="Switch Language / भाषा बदलें">
+        <div class="lang-slider"></div>
+        <span class="lang-option opt-en">EN</span>
+        <span class="lang-option opt-hi">हिन्दी</span>
+      </div>
+
+      <button class="btn btn-top-scan" onclick="openScannerModal()" style="padding: 8px 15px; font-size: 12px;">
+        <i data-lucide="scan" style="width: 14px; height: 14px;"></i>
+        <span class="scan-label-full" data-i18n="btnTopScan">Scan Barcode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MOBILE BOTTOM NAVIGATION DOCK (<= 768px) ================= -->
+  <nav class="mobile-bottom-dock" aria-label="Mobile Navigation">
+    <button class="dock-item is-active" data-tab="overview" onclick="switchTab('overview')">
+      <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+      <span data-i18n="mobOverview">Overview</span>
+    </button>
+
+    <button class="dock-item" data-tab="pos" onclick="switchTab('pos')">
+      <i data-lucide="receipt" style="width: 18px; height: 18px;"></i>
+      <span data-i18n="mobPOS">POS Bill</span>
+    </button>
+
+    <button class="dock-item-scan" onclick="openScannerModal()" aria-label="Scan Barcode">
+      <i data-lucide="scan-line" style="width: 21px; height: 21px;"></i>
+      <span data-i18n="mobScan">Scan</span>
+    </button>
+
+    <button class="dock-item" data-tab="stock" onclick="switchTab('stock')">
+      <i data-lucide="boxes" style="width: 18px; height: 18px;"></i>
+      <span data-i18n="mobStock">Stock & Expiry</span>
+    </button>
+  </nav>
+
+  <!-- ================= NOTIFICATION TOAST ================= -->
+  <div id="toast">
+    <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); color: var(--emerald); display: grid; place-items: center; flex-shrink: 0;">
+      <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+    </div>
+    <div>
+      <b style="font-size: 13px; display: block; font-family: var(--font-display);" id="toastTitle">Updated</b>
+      <small style="font-size: 11px; color: var(--ink-muted); line-height: 1.4; display: block;" id="toastDesc">Operation successful.</small>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APPLICATION WORKSPACE ================= -->
+  <main>
+
+    <!-- ================= TAB 1: OVERVIEW ================= -->
+    <section class="workspace-panel is-active" id="panel-overview">
+
+      <!-- HERO BANNER -->
+      <section class="hero-banner">
+        <div class="hero-copy">
+          <div class="eyebrow" data-i18n="heroEyebrow">Smart Kirana Shelf & Wastage Radar</div>
+          <h1 data-i18n="heroTitle">Zero spoiled stock.<br><span style="color:var(--lime)">Predictable store control.</span></h1>
+          <p data-i18n="heroDesc">
+            Real-world Kirana inventory intelligence. Automatic FIFO stock deduction, front-shelf rotation alerts before expiry, and strict POS lockdown on expired packets.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn" onclick="switchTab('pos')">
+              <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
+              <span data-i18n="heroStartBill">Open POS Counter</span>
+            </button>
+            <button class="btn btn-ghost" onclick="switchTab('stock')">
+              <i data-lucide="boxes" style="width: 14px; height: 14px; color: var(--emerald);"></i>
+              <span data-i18n="heroViewStock">Stock & Expiry Ledger</span>
+            </button>
+            <button class="btn btn-ghost" onclick="resetDemoData()" style="padding: 10px 14px; font-size: 12px;">
+              <i data-lucide="rotate-ccw" style="width: 13px; height: 13px; color: var(--ink-muted);"></i>
+              <span data-i18n="btnResetDemo">Reset Demo Data</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTINUOUS MARQUEE TELEMETRY TICKER -->
+      <section class="offer-ticker">
+        <div class="ticker-label">
+          <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
+          <span data-i18n="tickerLabel">RADAR</span>
+        </div>
+        <div class="ticker-window">
+          <div class="ticker-track" id="tickerContent"></div>
+        </div>
+      </section>
+
+      <!-- 4 BENTO METRIC CARDS (EXCLUSIVE TO OVERVIEW) -->
+      <section class="bento-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span data-i18n="kpiTotalValLabel">TOTAL STOCK VALUE</span>
+            <i data-lucide="boxes" style="width: 15px; height: 15px; color: var(--emerald);"></i>
+          </div>
+          <div class="metric-value" id="kpiTotalVal">₹0</div>
+          <div class="metric-sub">
+            <span style="color:var(--emerald)">●</span>
+            <span id="kpiTotalUnits">0 units in shop</span>
+          </div>
+        </div>
+
+        <div class="metric-card" style="border-color: rgba(245, 158, 11, 0.35);">
+          <div class="metric-header" style="color: var(--amber);">
+            <span data-i18n="kpiExpSoonLabel">EXPIRING SOON (&le; 7 DAYS)</span>
+            <i data-lucide="clock" style="width: 15px; height: 15px; color: var(--amber);"></i>
+          </div>
+          <div class="metric-value" id="kpiExpiringSoon" style="color: var(--amber);">0</div>
+          <div class="metric-sub" data-i18n="kpiExpSoonSub">Move to front rack (FIFO)</div>
+        </div>
+
+        <div class="metric-card" style="border-color: rgba(239, 68, 68, 0.35);">
+          <div class="metric-header" style="color: var(--rose);">
+            <span data-i18n="kpiExpiredValLabel">EXPIRED WASTAGE LOSS</span>
+            <i data-lucide="trash-2" style="width: 15px; height: 15px; color: var(--rose);"></i>
+          </div>
+          <div class="metric-value" id="kpiRiskVal" style="color: var(--rose);">₹0</div>
+          <div class="metric-sub" id="kpiRiskCount" style="color: var(--rose);">0 expired batches on shelf</div>
+        </div>
+
+        <div class="metric-card" style="border-color: rgba(56, 189, 248, 0.35);">
+          <div class="metric-header" style="color: var(--cyan);">
+            <span data-i18n="kpiRevenueLabel">TODAY'S REVENUE</span>
+            <i data-lucide="trending-up" style="width: 15px; height: 15px; color: var(--cyan);"></i>
+          </div>
+          <div class="metric-value" id="kpiTodaySales" style="color: var(--cyan);">₹0</div>
+          <div class="metric-sub" id="kpiTodayUnits">0 bills processed</div>
+        </div>
+      </section>
+
+      <!-- TWO-COLUMN DECISION GRID -->
+      <div class="layout-split">
+
+        <!-- Left: Urgent Expiry & Missing Date Alerts Feed -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+          <div id="missingDateCard" class="card" style="background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.38); display: none;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <i data-lucide="calendar-x" style="width: 20px; height: 20px; color: var(--purple); flex-shrink: 0; margin-top: 2px;"></i>
+              <div style="flex: 1;">
+                <b class="font-display" style="font-size: 14px;" data-i18n="missingDateTitle">Completeness Check: Missing Expiry Dates</b>
+                <p style="font-size: 11.5px; color: var(--ink-muted); margin: 3px 0 10px;" data-i18n="missingDateDesc">
+                  Staff nudge: Add expiry dates to these batches before selling so shelf rotation can be tracked.
+                </p>
+                <div id="missingItemsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
+              <div>
+                <b class="font-display" style="font-size: 15px;" data-i18n="returnNoticeTitle">Urgent Shelf & Wastage Action Feed</b>
+                <p style="font-size: 11.5px; color: var(--ink-muted); margin: 2px 0 0;" data-i18n="returnNoticeSub">Discard expired items immediately; push near-expiry slow movers to front rack</p>
+              </div>
+              <span class="tag-pill tag-critical" data-i18n="tagReturnAction">LIVE ALERTS</span>
+            </div>
+
+            <div id="expiryActionFeed" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+
+        </div>
+
+        <!-- Right: Sales Velocity Ranking & Kirana Operational Logic -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+          <div class="card">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+              <div>
+                <b class="font-display" style="font-size: 14.5px;" data-i18n="fastMoversTitle">Sales Velocity & Stock Horizon</b>
+                <p style="font-size: 11px; color: var(--ink-muted); margin: 2px 0 0;" data-i18n="fastMoversSub">Fast vs. Slow movers ranked with Days of Stock Left</p>
+              </div>
+              <span style="font: 700 10px var(--font-mono); color: var(--emerald);" data-i18n="lblUnitsDay">VELOCITY</span>
+            </div>
+            <div id="fastMoversList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <div class="card" style="background: rgba(16, 185, 129, 0.05); border-color: var(--border-strong);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <i data-lucide="shield-check" style="width: 17px; height: 17px; color: var(--emerald);"></i>
+              <b class="font-display" style="font-size: 13.5px;" data-i18n="kiranaHelpTitle">Kirana Operational Logic</b>
+            </div>
+            <p style="font-size: 11.5px; color: var(--ink-muted); line-height: 1.65; margin: 0;" data-i18n="kiranaHelpDesc">
+              • <strong>FIFO Auto-Deduction:</strong> POS billing deducts from earliest expiring batch first.<br>
+              • <strong>Zero Expired Billing:</strong> Expired stock (&le; 0d) is strictly blocked at checkout.<br>
+              • <strong>Front-Rack Priority:</strong> Slow-moving near-expiry batches get moved forward & reorders paused.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: FAST BILLING (POS) — NO BENTO CARDS ================= -->
+    <section class="workspace-panel" id="panel-pos">
+      <div class="layout-split">
+
+        <!-- Left: Barcode Search + 1-Tap Counter -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+          <div class="card" style="padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div>
+                <b class="font-display" style="font-size: 15px;" data-i18n="posSearchTitle">Scan Barcode or Search Item</b>
+                <p style="font-size: 11px; color: var(--ink-muted); margin: 2px 0 0;" data-i18n="posSearchSub">USB Scanner gun ready • or tap Camera Scan</p>
+              </div>
+              <button class="btn" onclick="openScannerModal()" style="padding: 8px 13px; font-size: 11.5px;">
+                <i data-lucide="camera" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btnCameraScan">Camera Scan</span>
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <div style="position: relative; flex: 1;">
+                <input type="text" id="posBarcodeInput" onkeydown="handleBarcodeKeypress(event)" placeholder="Barcode or item name..." style="width: 100%; padding: 11px 12px 11px 36px; border-radius: 12px; border: 1px solid var(--border-strong); background: #0a140f; color: var(--ink); font-size: 13px;">
+                <i data-lucide="barcode" style="width: 16px; height: 16px; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-muted);"></i>
+              </div>
+              <button class="btn" onclick="executeBarcodeAdd()">
+                <span data-i18n="btnAddItem">Add</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <b class="font-display" style="font-size: 14px;" data-i18n="quickTapTitle">1-Tap Fast Counter Items</b>
+              <span style="font: 700 10px var(--font-mono); color: var(--emerald);" data-i18n="lblInstantAdd">FIFO AUTO</span>
+            </div>
+            <div id="quickCounterGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 10px;"></div>
+          </div>
+
+        </div>
+
+        <!-- Right: Live POS Receipt Cart -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 460px;">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="receipt" style="width: 17px; height: 17px; color: var(--emerald);"></i>
+                <b class="font-display" style="font-size: 15px;" data-i18n="cartTitle">Customer Bill Receipt</b>
+              </div>
+              <button onclick="clearCart()" style="font: 700 11px var(--font-mono); color: var(--rose); background: transparent; border: 0;" data-i18n="btnClearCart">Clear Bill</button>
+            </div>
+
+            <div id="cartItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 310px; overflow-y: auto;"></div>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: 16px;">
+            <div style="display: flex; justify-content: space-between; font: 600 12px var(--font-mono); color: var(--ink-muted); margin-bottom: 6px;">
+              <span data-i18n="cartTotalItems">Total Packets:</span>
+              <span id="cartUnitCount" style="color: var(--ink); font-weight: 700;">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font: 800 22px var(--font-display); color: var(--ink); border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 14px;">
+              <span data-i18n="cartTotalPayable">Total Amount:</span>
+              <span id="cartTotalAmount" style="color: var(--emerald);">₹0</span>
+            </div>
+
+            <button class="btn" onclick="checkoutCart()" style="width: 100%; justify-content: center; padding: 13px; font-size: 14px;">
+              <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+              <span data-i18n="btnCompleteSale">Complete Cash Bill & Deduct Stock</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: EXPIRY & STOCK LEDGER ================= -->
+    <section class="workspace-panel" id="panel-stock">
+      <div class="card" style="margin-bottom: 14px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+          <div>
+            <b class="font-display" style="font-size: 16px;" data-i18n="stockViewTitle">Master Stock & Expiry Ledger</b>
+            <p style="font-size: 11.5px; color: var(--ink-muted); margin: 2px 0 0;" data-i18n="stockViewSub">
+              Batch-level tracking with supplier records, rack positions, and wastage write-off controls.
+            </p>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; max-width: 390px;">
+            <input type="text" id="stockSearchInput" oninput="renderStockViews()" placeholder="Search item, supplier, rack..." style="flex: 1; min-width: 140px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: #0a140f; color: var(--ink); font-size: 12px;">
+            <button class="btn" onclick="openAddBatchModal()" style="padding: 9px 14px; font-size: 12px;">
+              <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+              <span data-i18n="btnAddBatchStock">+ Add Inward Stock</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="filter-scroll-row" style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+          <button class="filter-pill is-active" data-filter="all" onclick="setStockFilter('all', this)" data-i18n="fltAll">All Stock</button>
+          <button class="filter-pill" data-filter="expired" onclick="setStockFilter('expired', this)" data-i18n="fltExpired">Expired</button>
+          <button class="filter-pill" data-filter="warning" onclick="setStockFilter('warning', this)" data-i18n="fltExpiringSoon">Expiring Soon</button>
+          <button class="filter-pill" data-filter="missing" onclick="setStockFilter('missing', this)" data-i18n="fltMissing">Missing Expiry</button>
+          <button class="filter-pill" data-filter="healthy" onclick="setStockFilter('healthy', this)" data-i18n="fltSafe">Healthy</button>
+        </div>
+      </div>
+
+      <!-- Desktop Responsive Table (> 768px) -->
+      <div class="table-wrap">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th data-i18n="thItem">Product & Batch</th>
+              <th data-i18n="thBatchShelf">Shelf Location</th>
+              <th data-i18n="thStock">Qty & Velocity</th>
+              <th data-i18n="thCostMrp">Cost / MRP</th>
+              <th data-i18n="thExpiryDate">Expiry Date</th>
+              <th data-i18n="thDaysLeft">Days Left</th>
+              <th data-i18n="thStatus">Status</th>
+              <th style="text-align: right;" data-i18n="thAction">Action</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Stacked Cards (<= 768px — Zero Horizontal Overflow) -->
+      <div class="mobile-stock-cards" id="mobileStockCards"></div>
+    </section>
+
+  </main>
+
+  <!-- ================= DEDICATED BARCODE SCANNER MODAL ================= -->
+  <div class="modal-backdrop" id="scannerModal">
+    <div class="modal-dialog">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="brand-mark" style="width: 28px; height: 28px; font-size: 13px;">✦</div>
+          <b class="font-display" style="font-size: 14.5px;" data-i18n="modalScannerTitle">Optical Barcode Scanner</b>
+        </div>
+        <button onclick="closeScannerModal()" style="background: transparent; border: 0; color: var(--ink-muted); font-size: 18px; padding: 4px 8px;">✕</button>
+      </div>
+
+      <div class="scanner-viewport">
+        <video id="modalVideo" autoplay playsinline></video>
+        <div class="scanner-target-box"></div>
+        <div class="laser-line"></div>
+        <div id="cameraFallbackHint" style="position: absolute; bottom: 8px; font: 700 9px var(--font-mono); background: rgba(0,0,0,0.82); padding: 4px 10px; border-radius: 99px; color: var(--lime);">
+          ALIGN BARCODE WITH LASER • OR TAP PRESET BELOW
+        </div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <small style="font: 700 10px var(--font-mono); color: var(--ink-muted); display: block; margin-bottom: 6px;" data-i18n="quickSimLabel">
+          TAP BARCODE PRESET TO SIMULATE SCAN:
+        </small>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901262010115')" style="text-align: left; padding: 7px 9px;">
+            <b>🥛 Amul Taaza Milk</b><br><span style="font-size: 9px; opacity: 0.75;">8901262010115 • 2d Left</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901063012111')" style="text-align: left; padding: 7px 9px;">
+            <b>🍞 Britannia Bread</b><br><span style="font-size: 9px; opacity: 0.75;">8901063012111 • 3d Left</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901058852331')" style="text-align: left; padding: 7px 9px;">
+            <b>🍜 Maggi Noodles</b><br><span style="font-size: 9px; opacity: 0.75;">8901058852331 • Fast Mover</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901080011223')" style="text-align: left; padding: 7px 9px;">
+            <b>🧂 Tata Iodized Salt</b><br><span style="font-size: 9px; opacity: 0.75;">8901080011223 • Healthy</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901719101010')" style="text-align: left; padding: 7px 9px;">
+            <b>🌾 Aashirvaad Atta 5kg</b><br><span style="font-size: 9px; opacity: 0.75;">8901719101010 • Healthy</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901719105500')" style="text-align: left; padding: 7px 9px;">
+            <b>🍪 Parle-G Gold 1kg</b><br><span style="font-size: 9px; opacity: 0.75;">8901719105500 • Missing Date</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901262050220')" style="text-align: left; padding: 7px 9px; border-color: rgba(239,68,68,0.45); color: var(--rose);">
+            <b>🥣 Mother Dairy Curd</b><br><span style="font-size: 9px; opacity: 0.85;">8901262050220 • EXPIRED</span>
+          </button>
+          <button class="btn-sm" onclick="triggerBarcodeScan('8901088044551')" style="text-align: left; padding: 7px 9px;">
+            <b>🌻 Saffola Gold 1L</b><br><span style="font-size: 9px; opacity: 0.75;">8901088044551 • 5d Left</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Instant Scan Result Card -->
+      <div id="scanResultCard" style="display: none; margin-top: 12px; padding: 12px; border-radius: 12px; background: rgba(16, 185, 129, 0.08); border: 1.5px solid var(--emerald);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <b class="font-display" id="scanTitle" style="font-size: 13.5px; display: block;">Item Name</b>
+            <small id="scanMeta" style="color: var(--ink-muted); font-size: 10.5px; display: block; margin-top: 2px;">Location & FIFO info</small>
+          </div>
+          <b id="scanPrice" style="font: 800 16px var(--font-mono); color: var(--emerald);">₹0</b>
+        </div>
+        <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 8px; margin-top: 10px;">
+          <button class="btn" id="scanAddBillBtn" style="justify-content: center; padding: 9px; font-size: 12px;">
+            <span data-i18n="btnAddPosBill">Add to POS Bill</span>
+          </button>
+          <button class="btn btn-ghost" id="scanInspectBtn" style="justify-content: center; padding: 9px; font-size: 12px;">
+            <span data-i18n="btnInspectStock">Inspect in Stock</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= INWARD STOCK MODAL ================= -->
+  <div class="modal-backdrop" id="inwardModal">
+    <div class="modal-dialog">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px;">
+        <b class="font-display" style="font-size: 15px;" data-i18n="modalInwardTitle">Add Inward FMCG Batch</b>
+        <button onclick="closeAddBatchModal()" style="background: transparent; border: 0; color: var(--ink-muted); font-size: 16px; padding: 4px 8px;">✕</button>
+      </div>
+
+      <form onsubmit="handleInwardSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label data-i18n="lblProdName">Product Name *</label>
+            <input type="text" id="inName" required placeholder="e.g. Amul Butter 100g">
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblBarcode">Barcode (EAN-13)</label>
+            <input type="text" id="inBarcode" placeholder="e.g. 8901262010115">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label data-i18n="lblCategory">Category</label>
+            <select id="inCategory">
+              <option value="Dairy">Dairy</option>
+              <option value="Bakery">Bakery</option>
+              <option value="Snacks">Snacks & Namkeen</option>
+              <option value="Grains">Grains & Staples</option>
+              <option value="Edible Oil">Edible Oil</option>
+              <option value="Personal Care">Personal Care</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblSupplier">Supplier / Agency *</label>
+            <input type="text" id="inSupplier" required placeholder="e.g. Jammu Dairy Distributors">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label data-i18n="lblBatch">Batch Code *</label>
+            <input type="text" id="inBatch" required placeholder="e.g. BTH-901">
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblQty">Quantity (Units) *</label>
+            <input type="number" id="inQty" required min="1" placeholder="Units">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label data-i18n="lblCost">Cost Price (₹) *</label>
+            <input type="number" id="inCost" required min="0" step="0.5">
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblMrp">MRP (₹) *</label>
+            <input type="number" id="inMrp" required min="0" step="0.5">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label data-i18n="lblPurchaseDate">Purchase Date *</label>
+            <input type="date" id="inPurchaseDate" required>
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblExpiry">Expiry Date (Optional)</label>
+            <input type="date" id="inExpiry">
+          </div>
+          <div class="form-group">
+            <label data-i18n="lblShelf">Shelf Location *</label>
+            <input type="text" id="inShelf" required placeholder="e.g. Chiller A">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+          <button type="button" class="btn btn-ghost" onclick="closeAddBatchModal()" data-i18n="btnCancel">Cancel</button>
+          <button type="submit" class="btn" data-i18n="btnSaveBatch">Save Batch to Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= UPDATE EXPIRY DATE MODAL ================= -->
+  <div class="modal-backdrop" id="updateExpiryModal">
+    <div class="modal-dialog" style="max-width: 380px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px;">
+        <b class="font-display" style="font-size: 14.5px;" data-i18n="modalSetDateTitle">Set Missing Expiry Date</b>
+        <button onclick="closeUpdateExpiryModal()" style="background: transparent; border: 0; color: var(--ink-muted); font-size: 16px; padding: 4px 8px;">✕</button>
+      </div>
+
+      <p id="editProdTitle" style="font-weight: 700; font-size: 13px; margin: 0 0 10px;"></p>
+
+      <div class="form-group">
+        <label data-i18n="lblVerifiedDate">Verified Expiration Date *</label>
+        <input type="date" id="targetExpiryDate">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+        <button type="button" class="btn btn-ghost" onclick="closeUpdateExpiryModal()" data-i18n="btnCancel">Cancel</button>
+        <button type="button" class="btn" onclick="commitUpdatedExpiry()" data-i18n="btnSaveDate">Save & Update Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOGIC ENGINE SCRIPT ================= -->
+  <script>
+    // =========================================================
+    // 1. BILINGUAL DICTIONARY (ENGLISH <-> HINDI)
+    // =========================================================
+    const I18N = {
+      en: {
+        navOverview: 'Overview',
+        navPOS: 'Fast Billing (POS)',
+        navStock: 'Expiry & Stock',
+        mobOverview: 'Overview',
+        mobPOS: 'POS Bill',
+        mobScan: 'Scan',
+        mobStock: 'Stock & Expiry',
+        btnTopScan: 'Scan Barcode',
+        heroEyebrow: 'Smart Kirana Shelf & Wastage Radar',
+        heroTitle: 'Zero spoiled stock.<br><span style="color:var(--lime)">Predictable store control.</span>',
+        heroDesc: 'Real-world Kirana inventory intelligence. Automatic FIFO stock deduction, front-shelf rotation alerts before expiry, and strict POS lockdown on expired packets.',
+        heroStartBill: 'Open POS Counter',
+        heroViewStock: 'Stock & Expiry Ledger',
+        btnResetDemo: 'Reset Demo Data',
+        tickerLabel: 'RADAR',
+        kpiTotalValLabel: 'TOTAL STOCK VALUE',
+        kpiExpSoonLabel: 'EXPIRING SOON (≤ 7 DAYS)',
+        kpiExpSoonSub: 'Move to front rack (FIFO)',
+        kpiExpiredValLabel: 'EXPIRED WASTAGE LOSS',
+        kpiRevenueLabel: "TODAY'S REVENUE",
+        missingDateTitle: 'Completeness Check: Missing Expiry Dates',
+        missingDateDesc: 'Staff nudge: Add expiry dates to these batches before selling so shelf rotation can be tracked.',
+        returnNoticeTitle: 'Urgent Shelf & Wastage Action Feed',
+        returnNoticeSub: 'Discard expired items immediately; push near-expiry slow movers to front rack',
+        tagReturnAction: 'LIVE ALERTS',
+        fastMoversTitle: 'Sales Velocity & Stock Horizon',
+        fastMoversSub: 'Fast vs. Slow movers ranked with Days of Stock Left',
+        lblUnitsDay: 'VELOCITY',
+        kiranaHelpTitle: 'Kirana Operational Logic',
+        kiranaHelpDesc: '• <strong>FIFO Auto-Deduction:</strong> POS billing deducts from earliest expiring batch first.<br>• <strong>Zero Expired Billing:</strong> Expired stock (≤ 0d) is strictly blocked at checkout.<br>• <strong>Front-Rack Priority:</strong> Slow-moving near-expiry batches get moved forward & reorders paused.',
+        posSearchTitle: 'Scan Barcode or Search Item',
+        posSearchSub: 'USB Scanner gun ready • or tap Camera Scan',
+        btnCameraScan: 'Camera Scan',
+        btnAddItem: 'Add',
+        quickTapTitle: '1-Tap Fast Counter Items',
+        lblInstantAdd: 'FIFO AUTO',
+        cartTitle: 'Customer Bill Receipt',
+        btnClearCart: 'Clear Bill',
+        cartTotalItems: 'Total Packets:',
+        cartTotalPayable: 'Total Amount:',
+        btnCompleteSale: 'Complete Cash Bill & Deduct Stock',
+        stockViewTitle: 'Master Stock & Expiry Ledger',
+        stockViewSub: 'Batch-level tracking with supplier records, rack positions, and wastage write-off controls.',
+        btnAddBatchStock: '+ Add Inward Stock',
+        fltAll: 'All Stock',
+        fltExpired: 'Expired',
+        fltExpiringSoon: 'Expiring Soon',
+        fltMissing: 'Missing Expiry',
+        fltSafe: 'Healthy',
+        thItem: 'Product & Batch',
+        thBatchShelf: 'Shelf Location',
+        thStock: 'Qty & Velocity',
+        thCostMrp: 'Cost / MRP',
+        thExpiryDate: 'Expiry Date',
+        thDaysLeft: 'Days Left',
+        thStatus: 'Status',
+        thAction: 'Action',
+        modalScannerTitle: 'Optical Barcode Scanner',
+        quickSimLabel: 'TAP BARCODE PRESET TO SIMULATE SCAN:',
+        btnAddPosBill: 'Add to POS Bill',
+        btnInspectStock: 'Inspect in Stock',
+        modalInwardTitle: 'Add Inward FMCG Batch',
+        lblProdName: 'Product Name *',
+        lblCategory: 'Category',
+        lblBarcode: 'Barcode (EAN-13)',
+        lblSupplier: 'Supplier / Agency *',
+        lblBatch: 'Batch Code *',
+        lblQty: 'Quantity (Units) *',
+        lblCost: 'Cost Price (₹) *',
+        lblMrp: 'MRP (₹) *',
+        lblPurchaseDate: 'Purchase Date *',
+        lblExpiry: 'Expiry Date (Optional)',
+        lblShelf: 'Shelf Location *',
+        btnCancel: 'Cancel',
+        btnSaveBatch: 'Save Batch to Stock',
+        modalSetDateTitle: 'Set Missing Expiry Date',
+        lblVerifiedDate: 'Verified Expiration Date *',
+        btnSaveDate: 'Save & Update Status'
+      },
+      hi: {
+        navOverview: 'ओवरव्यू',
+        navPOS: 'तुरन्त बिलिंग (POS)',
+        navStock: 'स्टॉक व एक्सपायरी',
+        mobOverview: 'ओवरव्यू',
+        mobPOS: 'POS बिल',
+        mobScan: 'स्कैन',
+        mobStock: 'स्टॉक व एक्सपायरी',
+        btnTopScan: 'बारकोड स्कैन',
+        heroEyebrow: 'स्मार्ट किराना शेल्फ एवं नुकसान रडार',
+        heroTitle: 'शून्य खराब स्टॉक।<br><span style="color:var(--lime)">दुकान पर पूरा नियंत्रण।</span>',
+        heroDesc: 'असली किराना दुकान का प्रबंधन। स्वतः फीफो (FIFO) स्टॉक कटौती, एक्सपायरी से पहले आगे के रैक पर रखने की चेतावनी, और खराब माल की बिलिंग पर सख्त रोक।',
+        heroStartBill: 'बिलिंग काउंटर खोलें',
+        heroViewStock: 'स्टॉक व एक्सपायरी लेजर',
+        btnResetDemo: 'डेमो रीसेट करें',
+        tickerLabel: 'लाइव रडार',
+        kpiTotalValLabel: 'कुल सामान का मूल्य',
+        kpiExpSoonLabel: 'जल्द एक्सपायर (≤ 7 दिन)',
+        kpiExpSoonSub: 'आगे के रैक पर रखें (FIFO)',
+        kpiExpiredValLabel: 'एक्सपायर माल नुकसान',
+        kpiRevenueLabel: 'आज की कुल बिक्री',
+        missingDateTitle: 'जांच चेतावनी: एक्सपायरी तारीख दर्ज नहीं है',
+        missingDateDesc: 'स्टाफ सूचना: बिक्री से पहले इन बैचों की एक्सपायरी तारीख दर्ज करें।',
+        returnNoticeTitle: 'तत्काल रैक व खराब माल कार्यवाही बोर्ड',
+        returnNoticeSub: 'एक्सपायर माल को तुरंत रैक से हटाकर नष्ट करें; जल्द एक्सपायर होने वाले माल को आगे रखें',
+        tagReturnAction: 'लाइव अलर्ट',
+        fastMoversTitle: 'बिक्री रफ्तार व स्टॉक दिन',
+        fastMoversSub: 'तेज बनाम धीमी बिक्री और बचे हुए स्टॉक के दिन',
+        lblUnitsDay: 'रफ्तार',
+        kiranaHelpTitle: 'दुकान के असली नियम',
+        kiranaHelpDesc: '• <strong>फीफो (FIFO) स्वतः:</strong> बिलिंग में हमेशा सबसे पहले पुरानी एक्सपायरी वाला पैकेट कटेगा।<br>• <strong>एक्सपायर ब्लॉक:</strong> खराब हो चुका सामान (≤ 0 दिन) बिल में कभी नहीं जुड़ सकता।<br>• <strong>फ्रंट-रैक प्राथमिकता:</strong> धीमी बिक्री वाले माल को आगे रखें और नया ऑर्डर रोकें।',
+        posSearchTitle: 'बारकोड स्कैन करें या नाम खोजें',
+        posSearchSub: 'USB स्कैनर गन तैयार है • या कैमरा स्कैनर दबाएं',
+        btnCameraScan: 'कैमरा स्कैनर',
+        btnAddItem: 'जोड़ें',
+        quickTapTitle: '1-क्लिक काउंटर सामान (तुरंत जोड़ें)',
+        lblInstantAdd: 'FIFO स्वतः',
+        cartTitle: 'ग्राहक का बिल (रसीद)',
+        btnClearCart: 'बिल साफ करें',
+        cartTotalItems: 'कुल पैकेट:',
+        cartTotalPayable: 'कुल रकम:',
+        btnCompleteSale: 'नकद बिल पूरा करें व स्टॉक घटाएं',
+        stockViewTitle: 'मास्टर स्टॉक एवं एक्सपायरी लेजर',
+        stockViewSub: 'सप्लायर विवरण, रैक लोकेशन और खराब माल राइट-ऑफ नियंत्रण।',
+        btnAddBatchStock: '+ नया स्टॉक जोड़ें',
+        fltAll: 'सभी स्टॉक',
+        fltExpired: 'सिर्फ एक्सपायर',
+        fltExpiringSoon: 'जल्द एक्सपायर',
+        fltMissing: 'बिना तारीख',
+        fltSafe: 'सुरक्षित',
+        thItem: 'सामान व बैच',
+        thBatchShelf: 'रैक लोकेशन',
+        thStock: 'मात्रा व रफ्तार',
+        thCostMrp: 'खरीद / बिक्री',
+        thExpiryDate: 'एक्सपायरी तारीख',
+        thDaysLeft: 'बचे दिन',
+        thStatus: 'स्थिति',
+        thAction: 'कार्यवाही',
+        modalScannerTitle: 'ऑप्टिकल बारकोड स्कैनर',
+        quickSimLabel: 'डेमो बारकोड पर क्लिक करके स्कैन करें:',
+        btnAddPosBill: 'POS बिल में जोड़ें',
+        btnInspectStock: 'स्टॉक में जांचें',
+        modalInwardTitle: 'दुकान में नया माल दर्ज करें',
+        lblProdName: 'सामान का नाम *',
+        lblCategory: 'श्रेणी',
+        lblBarcode: 'बारकोड नंबर (EAN-13)',
+        lblSupplier: 'सप्लायर / एजेंसी *',
+        lblBatch: 'बैच कोड *',
+        lblQty: 'मात्रा (पैकेट) *',
+        lblCost: 'खरीद भाव (₹) *',
+        lblMrp: 'बिक्री भाव MRP (₹) *',
+        lblPurchaseDate: 'खरीद तारीख *',
+        lblExpiry: 'एक्सपायरी तारीख (वैकल्पिक)',
+        lblShelf: 'रैक / शेल्फ *',
+        btnCancel: 'रद्द करें',
+        btnSaveBatch: 'स्टॉक में सुरक्षित करें',
+        modalSetDateTitle: 'छूटी हुई एक्सपायरी तारीख दर्ज करें',
+        lblVerifiedDate: 'सही एक्सपायरी तारीख चुनें *',
+        btnSaveDate: 'सुरक्षित करें'
+      }
+    };
+
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const toggle = document.getElementById('langToggle');
+      if (lang === 'hi') {
+        toggle.classList.add('is-hi');
+      } else {
+        toggle.classList.remove('is-hi');
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[lang] && I18N[lang][key]) {
+          el.innerHTML = I18N[lang][key];
+        }
+      });
+
+      localStorage.setItem('kf_lang_mode', lang);
+      updateTicker();
+      refreshAll();
+    }
+
+    function toggleLanguage() {
+      setLanguage(currentLang === 'en' ? 'hi' : 'en');
+    }
+
+    // =========================================================
+    // 2. PRE-SEEDED 10 REALISTIC INDIAN FMCG BATCHES
+    // =========================================================
+    function getOffsetDate(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    }
+
+    const INITIAL_STOCK = [
+      {
+        id: 'SKU-01',
+        name: 'Amul Taaza Toned Milk 500ml',
+        category: 'Dairy',
+        supplier: 'Jammu Milk Union',
+        barcode: '8901262010115',
+        batch: 'MLK-04',
+        qty: 18,
+        cost: 26,
+        mrp: 29,
+        purchaseDate: getOffsetDate(-2),
+        expiryDate: getOffsetDate(2), // 2 Days left
+        shelf: 'Dairy Chiller A',
+        frontShelf: true,
+        velocity: 14.5
+      },
+      {
+        id: 'SKU-02',
+        name: 'Britannia Whole Wheat Bread 400g',
+        category: 'Bakery',
+        supplier: 'Tawi Bakers Supply',
+        barcode: '8901063012111',
+        batch: 'BRD-92',
+        qty: 16,
+        cost: 38,
+        mrp: 50,
+        purchaseDate: getOffsetDate(-3),
+        expiryDate: getOffsetDate(3), // 3 Days left, slow mover (5 days stock left > 3 days)
+        shelf: 'Rack 3 - Back',
+        frontShelf: false,
+        velocity: 3.2
+      },
+      {
+        id: 'SKU-03',
+        name: 'Mother Dairy Classic Curd 400g',
+        category: 'Dairy',
+        supplier: 'Jammu Milk Union',
+        barcode: '8901262050220',
+        batch: 'CRD-11',
+        qty: 6,
+        cost: 34,
+        mrp: 40,
+        purchaseDate: getOffsetDate(-8),
+        expiryDate: getOffsetDate(-1), // EXPIRED! 100% Wastage Write-Off
+        shelf: 'Dairy Chiller B',
+        frontShelf: false,
+        velocity: 6.5
+      },
+      {
+        id: 'SKU-04',
+        name: 'Haldiram Aloo Bhujia 200g',
+        category: 'Snacks',
+        supplier: 'Shivalik FMCG Agency',
+        barcode: '8904004401201',
+        batch: 'HLD-77',
+        qty: 24,
+        cost: 44,
+        mrp: 55,
+        purchaseDate: getOffsetDate(-20),
+        expiryDate: getOffsetDate(6), // 6 Days left, slow mover (10 days stock left > 6 days)
+        shelf: 'Aisle 2 - Mid',
+        frontShelf: false,
+        velocity: 2.4
+      },
+      {
+        id: 'SKU-05',
+        name: 'Parle-G Gold Biscuits 1kg',
+        category: 'Snacks',
+        supplier: 'Dogra Wholesale Corp',
+        barcode: '8901719105500',
+        batch: 'PRL-30',
+        qty: 30,
+        cost: 110,
+        mrp: 135,
+        purchaseDate: getOffsetDate(-5),
+        expiryDate: '', // Missing Date
+        shelf: 'Aisle 1 Lower',
+        frontShelf: false,
+        velocity: 6.8
+      },
+      {
+        id: 'SKU-06',
+        name: 'Maggi 2-Minute Masala Noodles 70g',
+        category: 'Snacks',
+        supplier: 'Nestle Jammu Depot',
+        barcode: '8901058852331',
+        batch: 'MGI-88',
+        qty: 65,
+        cost: 11.5,
+        mrp: 14,
+        purchaseDate: getOffsetDate(-10),
+        expiryDate: getOffsetDate(85),
+        shelf: 'Aisle 2 Top',
+        frontShelf: true,
+        velocity: 18.0
+      },
+      {
+        id: 'SKU-07',
+        name: 'Aashirvaad Shudh Chakki Atta 5kg',
+        category: 'Grains',
+        supplier: 'ITC Direct Jammu',
+        barcode: '8901719101010',
+        batch: 'ATT-10',
+        qty: 16,
+        cost: 215,
+        mrp: 250,
+        purchaseDate: getOffsetDate(-7),
+        expiryDate: getOffsetDate(50),
+        shelf: 'Grain Pallet 4',
+        frontShelf: true,
+        velocity: 4.5
+      },
+      {
+        id: 'SKU-08',
+        name: 'Tata Iodized Crystal Salt 1kg',
+        category: 'Grains',
+        supplier: 'Tata Consumer Jammu',
+        barcode: '8901080011223',
+        batch: 'SLT-19',
+        qty: 42,
+        cost: 22,
+        mrp: 28,
+        purchaseDate: getOffsetDate(-12),
+        expiryDate: getOffsetDate(180),
+        shelf: 'Aisle 3 - Base',
+        frontShelf: true,
+        velocity: 9.2
+      },
+      {
+        id: 'SKU-09',
+        name: 'Saffola Gold Pro Healthy Oil 1L',
+        category: 'Edible Oil',
+        supplier: 'Marico Distributors',
+        barcode: '8901088044551',
+        batch: 'SFL-54',
+        qty: 15,
+        cost: 145,
+        mrp: 175,
+        purchaseDate: getOffsetDate(-18),
+        expiryDate: getOffsetDate(5), // 5 Days left, slow mover
+        shelf: 'Oil Rack 1',
+        frontShelf: false,
+        velocity: 1.8
+      },
+      {
+        id: 'SKU-10',
+        name: 'Dettol Original Germ Soap 125g',
+        category: 'Personal Care',
+        supplier: 'Reckitt Agency',
+        barcode: '8901396112200',
+        batch: 'DTL-22',
+        qty: 24,
+        cost: 42,
+        mrp: 52,
+        purchaseDate: getOffsetDate(-4),
+        expiryDate: '', // Missing Date
+        shelf: 'Care Rack 3',
+        frontShelf: false,
+        velocity: 3.2
+      }
+    ];
+
+    let inventory = [];
+    let cart = [];
+    let sales = [];
+    let wastageLog = [];
+    let editingId = null;
+    let modalStream = null;
+    let currentStockFilter = 'all';
+
+    // Web Audio API Sound Engine
+    let audioContext = null;
+    function playBeep(isChime = false) {
+      try {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') audioContext.resume();
+
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        if (isChime) {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(587.33, audioContext.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.16);
+          gain.gain.setValueAtTime(0.24, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.36);
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.start();
+          osc.stop(audioContext.currentTime + 0.36);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(3100, audioContext.currentTime);
+          gain.gain.setValueAtTime(0.16, audioContext.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.start();
+          osc.stop(audioContext.currentTime + 0.08);
+        }
+      } catch (err) {
+        // Ignore audio errors on restricted devices
+      }
+    }
+
+    // Persistence
+    function initDB() {
+      const savedStock = localStorage.getItem('kf_prod_stock_v4');
+      if (savedStock) {
+        try {
+          inventory = JSON.parse(savedStock);
+        } catch (e) {
+          inventory = JSON.parse(JSON.stringify(INITIAL_STOCK));
+        }
+      } else {
+        inventory = JSON.parse(JSON.stringify(INITIAL_STOCK));
+        saveDB();
+      }
+
+      const savedSales = localStorage.getItem('kf_prod_sales_v4');
+      sales = savedSales ? JSON.parse(savedSales) : [];
+
+      const savedWastage = localStorage.getItem('kf_prod_wastage_v4');
+      wastageLog = savedWastage ? JSON.parse(savedWastage) : [];
+    }
+
+    function saveDB() {
+      localStorage.setItem('kf_prod_stock_v4', JSON.stringify(inventory));
+      localStorage.setItem('kf_prod_sales_v4', JSON.stringify(sales));
+      localStorage.setItem('kf_prod_wastage_v4', JSON.stringify(wastageLog));
+    }
+
+    function resetDemoData() {
+      inventory = JSON.parse(JSON.stringify(INITIAL_STOCK));
+      cart = [];
+      sales = [];
+      wastageLog = [];
+      saveDB();
+      refreshAll();
+      showToast(
+        currentLang === 'hi' ? 'डेमो डेटा रीसेट' : 'Demo Data Restored',
+        currentLang === 'hi' ? 'सभी 10 शुरुआती बैच और रैक वापस आ गए हैं।' : 'All 10 initial sample batches and counters restored.'
+      );
+    }
+
+    // =========================================================
+    // 3. EXPIRY & VELOCITY RISK EVALUATION
+    // =========================================================
+    function calculateStatus(item) {
+      const dosl = item.velocity > 0 ? Math.round((item.qty / item.velocity) * 10) / 10 : 999;
+
+      if (!item.expiryDate) {
+        return { due: null, dosl, status: 'MISSING', highRisk: false };
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const exp = new Date(item.expiryDate);
+      exp.setHours(0, 0, 0, 0);
+
+      const due = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+      const highRisk = due > 0 && dosl > due;
+
+      if (due <= 0) {
+        return { due, dosl, status: 'EXPIRED', highRisk: true };
+      } else if (due <= 3) {
+        return { due, dosl, status: 'CRITICAL', highRisk };
+      } else if (due <= 7) {
+        return { due, dosl, status: 'WARNING', highRisk };
+      }
+
+      return { due, dosl, status: 'HEALTHY', highRisk };
+    }
+
+    // Animated Count-Up for Bento Metric Values
+    function animateCounter(el, targetValue, prefix = '') {
+      if (!el) return;
+      const startVal = parseInt(el.dataset.current || '0', 10);
+      el.dataset.current = targetValue;
+      if (startVal === targetValue) {
+        el.innerText = prefix + targetValue.toLocaleString('en-IN');
+        return;
+      }
+
+      const duration = 450;
+      const startTime = performance.now();
+
+      function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(startVal + (targetValue - startVal) * eased);
+        el.innerText = prefix + current.toLocaleString('en-IN');
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Continuous Marquee Telemetry Ticker
+    function updateTicker() {
+      const track = document.getElementById('tickerContent');
+      if (!track) return;
+
+      let expiredCount = 0;
+      let expSoonCount = 0;
+      let topMover = inventory[0];
+
+      inventory.forEach(i => {
+        const s = calculateStatus(i);
+        if (s.status === 'EXPIRED') expiredCount++;
+        else if (s.status === 'CRITICAL' || s.status === 'WARNING') expSoonCount++;
+        if (topMover && i.velocity > topMover.velocity) topMover = i;
+      });
+
+      const topName = topMover ? `${topMover.name} (${topMover.velocity} u/d)` : 'Maggi Noodles';
+
+      if (currentLang === 'hi') {
+        track.innerHTML = `
+          <span>✦ ${expiredCount} बैच एक्सपायर (रैक से हटाएं व राइट-ऑफ करें)</span><i>•</i>
+          <span>${expSoonCount} सामान 7 दिन में एक्सपायर होंगे — आगे के रैक पर रखें</span><i>•</i>
+          <span>सबसे तेज बिक्री: ${topName}</span><i>•</i>
+          <span>फीफो (FIFO) स्वतः बिलिंग चालू है</span><i>•</i>
+          <span>✦ ${expiredCount} बैच एक्सपायर (रैक से हटाएं व राइट-ऑफ करें)</span><i>•</i>
+          <span>${expSoonCount} सामान 7 दिन में एक्सपायर होंगे — आगे के रैक पर रखें</span><i>•</i>
+        `;
+      } else {
+        track.innerHTML = `
+          <span>✦ ${expiredCount} Batches Expired (Pull from shelf & write-off)</span><i>•</i>
+          <span>${expSoonCount} Items expiring within 7 days — Move to front rack</span><i>•</i>
+          <span>Top Fast Mover: ${topName}</span><i>•</i>
+          <span>FIFO auto-deduction active across all counters</span><i>•</i>
+          <span>✦ ${expiredCount} Batches Expired (Pull from shelf & write-off)</span><i>•</i>
+          <span>${expSoonCount} Items expiring within 7 days — Move to front rack</span><i>•</i>
+        `;
+      }
+    }
+
+    // =========================================================
+    // 4. OVERVIEW WORKSPACE RENDERER
+    // =========================================================
+    function renderOverview() {
+      let totalUnits = 0;
+      let totalVal = 0;
+      let expiredShelfVal = 0;
+      let expiredBatches = 0;
+      let expSoonCount = 0;
+      const missingDates = [];
+      const noticeList = [];
+
+      inventory.forEach(item => {
+        totalUnits += item.qty;
+        totalVal += (item.qty * item.cost);
+        const s = calculateStatus(item);
+
+        if (s.status === 'EXPIRED') {
+          expiredShelfVal += (item.qty * item.cost);
+          expiredBatches++;
+          noticeList.push({ item, status: s });
+        } else if (s.status === 'CRITICAL' || s.status === 'WARNING') {
+          expSoonCount++;
+          noticeList.push({ item, status: s });
+        } else if (s.status === 'MISSING') {
+          missingDates.push(item);
+        }
+      });
+
+      const writtenOffVal = wastageLog.reduce((acc, w) => acc + w.loss, 0);
+      const totalWastageLoss = Math.round(expiredShelfVal + writtenOffVal);
+      const todayRev = Math.round(sales.reduce((acc, s) => acc + s.total, 0));
+
+      animateCounter(document.getElementById('kpiTotalVal'), Math.round(totalVal), '₹');
+      document.getElementById('kpiTotalUnits').innerText = `${totalUnits} ${currentLang === 'hi' ? 'पैकेट दुकान में' : 'units in shop'}`;
+
+      animateCounter(document.getElementById('kpiExpiringSoon'), expSoonCount, '');
+      animateCounter(document.getElementById('kpiRiskVal'), totalWastageLoss, '₹');
+      document.getElementById('kpiRiskCount').innerText = `${expiredBatches} ${currentLang === 'hi' ? 'एक्सपायर बैच रैक पर' : 'expired batches on shelf'}`;
+
+      animateCounter(document.getElementById('kpiTodaySales'), todayRev, '₹');
+      document.getElementById('kpiTodayUnits').innerText = `${sales.length} ${currentLang === 'hi' ? 'बिल पूरे हुए' : 'bills processed'}`;
+
+      // Missing Expiry Dates Alert Card
+      const missingCard = document.getElementById('missingDateCard');
+      const missingList = document.getElementById('missingItemsList');
+      if (missingDates.length > 0) {
+        missingCard.style.display = 'block';
+        missingList.innerHTML = missingDates.map(item => `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; border-radius: 10px; background: rgba(11, 22, 17, 0.9); border: 1px solid var(--border);">
+            <div>
+              <b style="font-size: 12.5px;">${item.name}</b>
+              <small style="color: var(--ink-muted); margin-left: 6px;">#${item.batch} • ${item.shelf}</small>
+            </div>
+            <button class="btn-sm" onclick="openDateModal('${item.id}')">${currentLang === 'hi' ? 'तारीख दर्ज करें' : 'Set Expiry'}</button>
+          </div>
+        `).join('');
+      } else {
+        missingCard.style.display = 'none';
+      }
+
+      // Urgent Shelf & Wastage Action Feed
+      const feed = document.getElementById('expiryActionFeed');
+      if (noticeList.length === 0) {
+        feed.innerHTML = `<div style="text-align: center; color: var(--ink-muted); padding: 18px; font-size: 12px;">${currentLang === 'hi' ? 'सभी सामान सुरक्षित हैं। कोई माल एक्सपायर नहीं है।' : 'All batches in safe condition. No expired stock.'}</div>`;
+      } else {
+        feed.innerHTML = noticeList.map(({ item, status }) => {
+          let badge = '';
+          let subAdvice = '';
+          let actionBtn = '';
+
+          if (status.status === 'EXPIRED') {
+            badge = `<span class="tag-pill tag-critical">${currentLang === 'hi' ? 'एक्सपायर - हटाएं' : 'EXPIRED - PULL'}</span>`;
+            subAdvice = currentLang === 'hi'
+              ? `100% नुकसान (₹${Math.round(item.qty * item.cost)}) • POS बिलिंग बंद`
+              : `100% Wastage Loss (₹${Math.round(item.qty * item.cost)}) • Locked at POS`;
+            actionBtn = `<button class="btn-sm btn-sm-danger" onclick="discardExpiredBatch('${item.id}')">${currentLang === 'hi' ? 'नष्ट / राइट-ऑफ करें' : 'Discard / Write-Off'}</button>`;
+          } else {
+            const riskTag = status.highRisk
+              ? `<span class="tag-pill tag-critical" style="font-size: 9px;">${currentLang === 'hi' ? 'धीमी बिक्री जोखिम' : 'DO NOT REORDER'}</span>`
+              : '';
+            badge = `<span class="tag-pill tag-warning">${status.due} ${currentLang === 'hi' ? 'दिन बचे' : 'days left'}</span> ${riskTag}`;
+            subAdvice = item.frontShelf
+              ? (currentLang === 'hi' ? '✓ आगे के रैक पर रखा गया • नया ऑर्डर रोकें' : '✓ Placed on Front Shelf (FIFO) • Reorder Paused')
+              : (currentLang === 'hi' ? `स्टॉक: ${status.dosl} दिन का माल बचा है • आगे के रैक पर लाएं` : `Stock Left: ${status.dosl}d vs ${status.due}d expiry • Move Forward`);
+            actionBtn = item.frontShelf
+              ? `<span class="tag-pill tag-front">${currentLang === 'hi' ? 'आगे का रैक ✓' : 'Front Shelf ✓'}</span>`
+              : `<button class="btn-sm btn-sm-amber" onclick="moveToFrontShelf('${item.id}')">${currentLang === 'hi' ? 'आगे के रैक पर रखें' : 'Move to Front Shelf'}</button>`;
+          }
+
+          return `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px; border-radius: 12px; background: #0b1611; border: 1px solid var(--border); flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 200px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  ${badge}
+                  <b style="font-size: 13px;">${item.name}</b>
+                </div>
+                <small style="color: var(--ink-muted); font-size: 11px; margin-top: 4px; display: block;">
+                  ${item.qty} ${currentLang === 'hi' ? 'पैकेट' : 'units'} • ${item.shelf} • ${subAdvice}
+                </small>
+              </div>
+              <div style="flex-shrink: 0;">${actionBtn}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Sales Velocity Ranking
+      const fastList = document.getElementById('fastMoversList');
+      const sorted = [...inventory].sort((a, b) => b.velocity - a.velocity);
+      fastList.innerHTML = sorted.map((item, idx) => {
+        const s = calculateStatus(item);
+        const isFast = item.velocity >= 6.0;
+        const speedTag = isFast
+          ? `<span style="font: 700 9.5px var(--font-mono); color: var(--emerald); background: rgba(16,185,129,0.14); padding: 2px 7px; border-radius: 6px;">${currentLang === 'hi' ? 'तेज बिक्री' : 'FAST'}</span>`
+          : `<span style="font: 700 9.5px var(--font-mono); color: var(--amber); background: rgba(245,158,11,0.14); padding: 2px 7px; border-radius: 6px;">${currentLang === 'hi' ? 'धीमी बिक्री' : 'SLOW'}</span>`;
+
+        const rankNum = idx < 9 ? `0${idx + 1}` : `${idx + 1}`;
+        return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 11px; border-radius: 10px; background: #0b1611; border: 1px solid var(--border);">
+            <div style="min-width: 0; padding-right: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font: 800 10.5px var(--font-mono); color: var(--ink-muted);">${rankNum}</span>
+                <b style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</b>
+              </div>
+              <small style="font-size: 10.5px; color: var(--ink-muted); margin-left: 20px; display: block;">
+                ${currentLang === 'hi' ? 'स्टॉक चलेगा:' : 'Stock left:'} <strong style="color: var(--ink);">${s.dosl}d</strong> • ${item.qty} units
+              </small>
+            </div>
+            <div style="text-align: right; flex-shrink: 0;">
+              ${speedTag}
+              <b style="font: 700 11.5px var(--font-mono); color: var(--ink); display: block; margin-top: 2px;">${item.velocity} u/d</b>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // =========================================================
+    // 5. FAST BILLING (POS) WORKSPACE
+    // =========================================================
+    function renderPOSView() {
+      const grid = document.getElementById('quickCounterGrid');
+      if (!grid) return;
+
+      grid.innerHTML = inventory.map(item => {
+        const s = calculateStatus(item);
+        const isExp = s.status === 'EXPIRED';
+
+        return `
+          <button class="spotlight-card" onclick="addToCart('${item.id}')" style="padding: 12px; text-align: left; cursor: ${isExp ? 'not-allowed' : 'pointer'}; border-radius: 14px; ${isExp ? 'opacity: 0.58; border-color: rgba(239, 68, 68, 0.55);' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center; font: 700 9px var(--font-mono); color: var(--ink-muted); margin-bottom: 5px;">
+              <span>${item.category}</span>
+              ${isExp ? `<span style="color:#ffffff; background: var(--rose); padding: 1px 6px; border-radius: 4px; font-weight:800;">EXPIRED</span>` : ''}
+            </div>
+            <b style="font-size: 12px; display: block; line-height: 1.3; margin-bottom: 8px; color: var(--ink);">${item.name}</b>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <b style="font: 800 14px var(--font-mono); color: ${isExp ? 'var(--rose)' : 'var(--emerald)'};">₹${item.mrp}</b>
+              <small style="font-size: 10px; color: var(--ink-muted);">${item.qty} ${currentLang === 'hi' ? 'बचे' : 'left'}</small>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      attachSpotlightListeners();
+      renderCart();
+    }
+
+    function addToCart(itemId) {
+      const item = inventory.find(i => i.id === itemId);
+      if (!item) return;
+
+      const s = calculateStatus(item);
+      if (s.status === 'EXPIRED') {
+        playBeep(false);
+        showToast(
+          currentLang === 'hi' ? 'बिक्री लॉक (एक्सपायर माल)' : 'POS Lockdown: Expired Item',
+          currentLang === 'hi' ? 'यह पैकेट एक्सपायर हो चुका है। इसे ग्राहक को नहीं बेच सकते।' : 'Cannot add expired item to bill. Discard from shelf immediately.'
+        );
+        return;
+      }
+      if (item.qty <= 0) {
+        showToast(
+          currentLang === 'hi' ? 'स्टॉक समाप्त' : 'Out of Stock',
+          currentLang === 'hi' ? 'दुकान में यह माल समाप्त है।' : 'Item has zero quantity in shop.'
+        );
+        return;
+      }
+
+      const existing = cart.find(c => c.itemId === itemId);
+      if (existing) {
+        if (existing.qty + 1 > item.qty) {
+          showToast(currentLang === 'hi' ? 'स्टॉक सीमा' : 'Stock Limit', `${item.name} only has ${item.qty} packets left.`);
+          return;
+        }
+        existing.qty += 1;
+      } else {
+        cart.push({
+          itemId: item.id,
+          name: item.name,
+          batch: item.batch,
+          mrp: item.mrp,
+          qty: 1
+        });
+      }
+
+      playBeep(false);
+      renderCart();
+    }
+
+    function changeCartQty(idx, delta) {
+      const c = cart[idx];
+      const item = inventory.find(i => i.id === c.itemId);
+      if (!item) return;
+
+      const newQty = c.qty + delta;
+      if (newQty <= 0) {
+        cart.splice(idx, 1);
+      } else if (newQty > item.qty) {
+        showToast(currentLang === 'hi' ? 'स्टॉक सीमा' : 'Stock Limit', `Only ${item.qty} units available.`);
+      } else {
+        c.qty = newQty;
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cartItemsList');
+      if (!list) return;
+
+      if (cart.length === 0) {
+        list.innerHTML = `<div style="text-align: center; color: var(--ink-muted); padding: 40px 12px; font-size: 12.5px;">${currentLang === 'hi' ? 'रसीद खाली है। बारकोड स्कैन करें या बाईं ओर से सामान चुनें।' : 'Receipt is empty. Scan a barcode or tap items on the left.'}</div>`;
+        document.getElementById('cartUnitCount').innerText = '0';
+        document.getElementById('cartTotalAmount').innerText = '₹0';
+        return;
+      }
+
+      let count = 0;
+      let total = 0;
+
+      list.innerHTML = cart.map((c, idx) => {
+        count += c.qty;
+        total += (c.mrp * c.qty);
+
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; border-radius: 10px; background: #0b1611; border: 1px solid var(--border);">
+            <div style="flex: 1; padding-right: 6px; min-width: 0;">
+              <b style="font-size: 12.5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.name}</b>
+              <small style="font: 600 10.5px var(--font-mono); color: var(--ink-muted);">₹${c.mrp} • #${c.batch}</small>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button onclick="changeCartQty(${idx}, -1)" style="width: 26px; height: 26px; border-radius: 7px; background: #12241b; border: 1px solid var(--border-strong); color: var(--ink); font-weight: 800; display: grid; place-items: center;">-</button>
+              <b style="font: 700 12px var(--font-mono); min-width: 18px; text-align: center;">${c.qty}</b>
+              <button onclick="changeCartQty(${idx}, 1)" style="width: 26px; height: 26px; border-radius: 7px; background: #12241b; border: 1px solid var(--border-strong); color: var(--ink); font-weight: 800; display: grid; place-items: center;">+</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: 10px;">
+              <b style="font: 800 13px var(--font-mono); color: var(--emerald); min-width: 48px; text-align: right;">₹${c.mrp * c.qty}</b>
+              <button onclick="changeCartQty(${idx}, -999)" style="background: transparent; border: 0; color: var(--rose); font-size: 15px; padding: 2px 4px;">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('cartUnitCount').innerText = count;
+      document.getElementById('cartTotalAmount').innerText = `₹${total}`;
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    function checkoutCart() {
+      if (cart.length === 0) {
+        showToast(currentLang === 'hi' ? 'रसीद खाली है' : 'Empty Bill', currentLang === 'hi' ? 'बिलिंग के लिए सामान जोड़ें।' : 'Add items before checkout.');
+        return;
+      }
+
+      let sum = 0;
+      cart.forEach(c => {
+        sum += (c.mrp * c.qty);
+        let remainingToDeduct = c.qty;
+        const primaryItem = inventory.find(i => i.id === c.itemId);
+        if (primaryItem) {
+          const matchingBatches = inventory
+            .filter(i => i.barcode === primaryItem.barcode && i.qty > 0 && calculateStatus(i).status !== 'EXPIRED')
+            .sort((a, b) => (a.expiryDate || '9999-12-31').localeCompare(b.expiryDate || '9999-12-31'));
+
+          matchingBatches.forEach(b => {
+            if (remainingToDeduct <= 0) return;
+            const take = Math.min(b.qty, remainingToDeduct);
+            b.qty -= take;
+            remainingToDeduct -= take;
+            b.velocity = Math.round((b.velocity + (take * 0.1)) * 10) / 10;
+          });
+        }
+      });
+
+      sales.unshift({
+        id: 'BILL-' + Date.now().toString().slice(-4),
+        total: sum,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      cart = [];
+      saveDB();
+      playBeep(true);
+      refreshAll();
+      showToast(
+        currentLang === 'hi' ? 'बिल पूरा हुआ (FIFO कटौती)' : 'Cash Bill Completed',
+        `₹${sum} ${currentLang === 'hi' ? 'का बिल बना और सबसे पुराने बैच से स्टॉक कम हो गया।' : 'bill generated & deducted from earliest FIFO batch.'}`
+      );
+    }
+
+    // =========================================================
+    // 6. EXPIRY & STOCK LEDGER (DESKTOP TABLE + MOBILE CARDS)
+    // =========================================================
+    function setStockFilter(filterKey, elem) {
+      currentStockFilter = filterKey;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('is-active'));
+      if (elem) elem.classList.add('is-active');
+      renderStockViews();
+    }
+
+    function getFilteredStock() {
+      const search = (document.getElementById('stockSearchInput').value || '').toLowerCase();
+      let filtered = inventory.filter(i =>
+        i.name.toLowerCase().includes(search) ||
+        i.batch.toLowerCase().includes(search) ||
+        i.shelf.toLowerCase().includes(search) ||
+        (i.supplier || '').toLowerCase().includes(search) ||
+        (i.barcode || '').includes(search)
+      );
+
+      if (currentStockFilter === 'expired') {
+        filtered = filtered.filter(i => calculateStatus(i).status === 'EXPIRED');
+      } else if (currentStockFilter === 'warning') {
+        filtered = filtered.filter(i => {
+          const s = calculateStatus(i);
+          return s.status === 'CRITICAL' || s.status === 'WARNING';
+        });
+      } else if (currentStockFilter === 'missing') {
+        filtered = filtered.filter(i => calculateStatus(i).status === 'MISSING');
+      } else if (currentStockFilter === 'healthy') {
+        filtered = filtered.filter(i => calculateStatus(i).status === 'HEALTHY');
+      }
+      return filtered;
+    }
+
+    function getRowMeta(item) {
+      const s = calculateStatus(item);
+      let statusBadge = '';
+      let actionBtn = '';
+
+      if (s.status === 'EXPIRED') {
+        statusBadge = `<span class="tag-pill tag-critical">${currentLang === 'hi' ? 'एक्सपायर - लॉक' : 'EXPIRED'}</span>`;
+        actionBtn = `<button class="btn-sm btn-sm-danger" onclick="discardExpiredBatch('${item.id}')">${currentLang === 'hi' ? 'नष्ट / राइट-ऑफ' : 'Discard / Write-Off'}</button>`;
+      } else if (s.status === 'CRITICAL' || s.status === 'WARNING') {
+        const reorderFlag = s.highRisk ? `<span class="tag-pill tag-critical" style="font-size: 9px; margin-left: 4px;">${currentLang === 'hi' ? 'ऑर्डर रोकें' : 'Do Not Reorder'}</span>` : '';
+        statusBadge = `<span class="tag-pill ${s.status === 'CRITICAL' ? 'tag-critical' : 'tag-warning'}">${s.due}d ${currentLang === 'hi' ? 'बचे' : 'left'}</span>${reorderFlag}`;
+        actionBtn = item.frontShelf
+          ? `<span class="tag-pill tag-front">${currentLang === 'hi' ? 'आगे का रैक ✓' : 'Front Shelf ✓'}</span>`
+          : `<button class="btn-sm btn-sm-amber" onclick="moveToFrontShelf('${item.id}')">${currentLang === 'hi' ? 'आगे रखें' : 'Move to Front Shelf'}</button>`;
+      } else if (s.status === 'MISSING') {
+        statusBadge = `<span class="tag-pill tag-missing">${currentLang === 'hi' ? 'तारीख नहीं' : 'MISSING EXPIRY'}</span>`;
+        actionBtn = `<button class="btn-sm" onclick="openDateModal('${item.id}')">${currentLang === 'hi' ? 'तारीख दर्ज करें' : 'Set Expiry'}</button>`;
+      } else {
+        statusBadge = `<span class="tag-pill tag-healthy">${currentLang === 'hi' ? 'सुरक्षित' : 'HEALTHY'}</span>`;
+        actionBtn = `<button class="btn-sm" onclick="addToCart('${item.id}')">${currentLang === 'hi' ? '+ बिल में जोड़ें' : '+ Add Bill'}</button>`;
+      }
+
+      return { s, statusBadge, actionBtn };
+    }
+
+    function renderStockViews() {
+      const tbody = document.getElementById('stockTableBody');
+      const mobileContainer = document.getElementById('mobileStockCards');
+      if (!tbody || !mobileContainer) return;
+
+      const filtered = getFilteredStock();
+
+      if (filtered.length === 0) {
+        const emptyMsg = currentLang === 'hi' ? 'कोई स्टॉक नहीं मिला' : 'No matching stock batches found';
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--ink-muted);">${emptyMsg}</td></tr>`;
+        mobileContainer.innerHTML = `<div class="m-stock-card" style="text-align:center; color: var(--ink-muted);">${emptyMsg}</div>`;
+        return;
+      }
+
+      // 1. Render Desktop Table Rows
+      tbody.innerHTML = filtered.map(item => {
+        const { s, statusBadge, actionBtn } = getRowMeta(item);
+        return `
+          <tr>
+            <td>
+              <b style="font-size: 13px; display: block;">${item.name}</b>
+              <small style="color: var(--ink-muted); font-size: 11px;">#${item.batch} • ${item.supplier || 'Direct Supply'}</small>
+            </td>
+            <td>
+              <span style="font: 700 11.5px var(--font-mono); color: ${item.frontShelf ? 'var(--cyan)' : 'var(--ink)'};">${item.shelf}</span>
+            </td>
+            <td>
+              <b style="font: 700 13px var(--font-mono);">${item.qty}</b>
+              <small style="display: block; font-size: 10px; color: var(--ink-muted);">${item.velocity} u/d (${s.dosl}d)</small>
+            </td>
+            <td>
+              <span style="font: 600 11px var(--font-mono);">₹${item.cost} / </span>
+              <b style="font: 800 12px var(--font-mono); color: var(--emerald);">₹${item.mrp}</b>
+            </td>
+            <td>
+              <span style="font: 600 11.5px var(--font-mono); color: ${item.expiryDate ? 'var(--ink)' : 'var(--purple)'};">
+                ${item.expiryDate ? item.expiryDate : (currentLang === 'hi' ? 'दर्ज नहीं' : 'Not Set')}
+              </span>
+            </td>
+            <td>
+              <b style="font: 700 11.5px var(--font-mono); color: ${s.due !== null && s.due <= 3 ? 'var(--rose)' : 'var(--ink)'};">
+                ${s.due === null ? '—' : (s.due <= 0 ? 'EXPIRED' : s.due + ' days')}
+              </b>
+            </td>
+            <td>${statusBadge}</td>
+            <td style="text-align: right;">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 2. Render Mobile Stacked Cards (Zero Horizontal Scroll)
+      mobileContainer.innerHTML = filtered.map(item => {
+        const { s, statusBadge, actionBtn } = getRowMeta(item);
+        return `
+          <div class="m-stock-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div>
+                <b style="font-size: 14px; display: block; line-height: 1.3;">${item.name}</b>
+                <small style="color: var(--ink-muted); font-size: 11px;">#${item.batch} • ${item.shelf}</small>
+              </div>
+              <b style="font: 800 14px var(--font-mono); color: var(--emerald);">₹${item.mrp}</b>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font: 600 11px var(--font-mono); color: var(--ink-muted); background: #0b1611; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);">
+              <span>Qty: <b style="color: var(--ink);">${item.qty}</b> (${item.velocity} u/d)</span>
+              <span>Exp: <b style="color: ${item.expiryDate ? 'var(--ink)' : 'var(--purple)'};">${item.expiryDate || 'Missing'}</b></span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <div>${statusBadge}</div>
+              <div>${actionBtn}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function discardExpiredBatch(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+
+      const lossAmt = item.qty * item.cost;
+      wastageLog.unshift({
+        id: 'WST-' + Date.now().toString().slice(-4),
+        name: item.name,
+        batch: item.batch,
+        qty: item.qty,
+        loss: lossAmt,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      inventory = inventory.filter(i => i.id !== id);
+      saveDB();
+      refreshAll();
+      showToast(
+        currentLang === 'hi' ? 'एक्सपायर माल राइट-ऑफ दर्ज' : 'Wastage Write-Off Logged',
+        `${item.name} (${item.qty} units, ₹${Math.round(lossAmt)} loss) ${currentLang === 'hi' ? 'रैक से हटाकर नुकसान खाते में दर्ज किया गया।' : 'removed from shelf & logged to Wastage Loss.'}`
+      );
+    }
+
+    function moveToFrontShelf(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+
+      item.frontShelf = true;
+      if (!item.shelf.includes('Front')) {
+        item.shelf = 'Front Counter Rack (FIFO)';
+      }
+      saveDB();
+      refreshAll();
+      showToast(
+        currentLang === 'hi' ? 'आगे के रैक पर स्थानांतरित' : 'Moved to Front Shelf (FIFO)',
+        `${item.name} ${currentLang === 'hi' ? 'को पहले बेचने के लिए आगे रखा गया व नया ऑर्डर रोका गया।' : 'prioritized at front counter & reorder flagged.'}`
+      );
+    }
+
+    // =========================================================
+    // 7. DEDICATED BARCODE SCANNER MODAL & HARDWARE GUN
+    // =========================================================
+    async function openScannerModal() {
+      document.getElementById('scannerModal').classList.add('is-open');
+      document.getElementById('scanResultCard').style.display = 'none';
+
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          modalStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          const vid = document.getElementById('modalVideo');
+          if (vid) vid.srcObject = modalStream;
+        }
+      } catch (e) {
+        // Graceful fallback when camera permission is denied/unavailable
+      }
+    }
+
+    function closeScannerModal() {
+      document.getElementById('scannerModal').classList.remove('is-open');
+      if (modalStream) {
+        modalStream.getTracks().forEach(t => t.stop());
+        modalStream = null;
+      }
+    }
+
+    function triggerBarcodeScan(query) {
+      playBeep(false);
+      const q = query.toLowerCase();
+      const item = inventory.find(i => i.barcode === query || i.name.toLowerCase().includes(q));
+      if (!item) {
+        showToast(currentLang === 'hi' ? 'सामान नहीं मिला' : 'Item Not Found', `"${query}" not found in inventory.`);
+        return;
+      }
+
+      const s = calculateStatus(item);
+      const isExp = s.status === 'EXPIRED';
+
+      const card = document.getElementById('scanResultCard');
+      card.style.borderColor = isExp ? 'var(--rose)' : 'var(--emerald)';
+      card.style.background = isExp ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.08)';
+
+      document.getElementById('scanTitle').innerText = `${item.name} (#${item.batch})`;
+      document.getElementById('scanMeta').innerText = isExp
+        ? (currentLang === 'hi' ? '⚠ एक्सपायर माल — बिक्री बंद! रैक से हटाएं।' : '⚠ EXPIRED STOCK — Blocked from sale! Discard immediately.')
+        : `${item.shelf} • ${item.qty} in stock • Exp: ${item.expiryDate || 'Missing'}`;
+      document.getElementById('scanPrice').innerText = `₹${item.mrp}`;
+      document.getElementById('scanPrice').style.color = isExp ? 'var(--rose)' : 'var(--emerald)';
+
+      const addBillBtn = document.getElementById('scanAddBillBtn');
+      const inspectBtn = document.getElementById('scanInspectBtn');
+
+      if (isExp) {
+        addBillBtn.innerHTML = `<span>${currentLang === 'hi' ? 'नष्ट / राइट-ऑफ करें' : 'Discard Expired Batch'}</span>`;
+        addBillBtn.onclick = () => {
+          discardExpiredBatch(item.id);
+          closeScannerModal();
+        };
+      } else {
+        addBillBtn.innerHTML = `<span>${currentLang === 'hi' ? 'POS बिल में जोड़ें' : 'Add to POS Bill'}</span>`;
+        addBillBtn.onclick = () => {
+          addToCart(item.id);
+          closeScannerModal();
+          switchTab('pos');
+        };
+      }
+
+      inspectBtn.onclick = () => {
+        closeScannerModal();
+        document.getElementById('stockSearchInput').value = item.barcode;
+        switchTab('stock');
+      };
+
+      card.style.display = 'block';
+    }
+
+    function handleBarcodeKeypress(e) {
+      if (e.key === 'Enter') executeBarcodeAdd();
+    }
+
+    function executeBarcodeAdd() {
+      const val = document.getElementById('posBarcodeInput').value.trim();
+      if (!val) return;
+      const item = inventory.find(i => i.barcode === val || i.name.toLowerCase().includes(val.toLowerCase()));
+      if (item) {
+        addToCart(item.id);
+      } else {
+        showToast(currentLang === 'hi' ? 'सामान नहीं मिला' : 'Item Not Found', `"${val}" not found.`);
+      }
+      document.getElementById('posBarcodeInput').value = '';
+    }
+
+    // Hardware Handheld Barcode Gun Listener
+    let keyBuffer = '';
+    let lastKey = Date.now();
+    window.addEventListener('keydown', e => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const now = Date.now();
+      if (now - lastKey > 140) keyBuffer = '';
+      lastKey = now;
+
+      if (e.key === 'Enter') {
+        if (keyBuffer.length >= 6) {
+          triggerBarcodeScan(keyBuffer);
+          keyBuffer = '';
+        }
+      } else if (e.key.length === 1) {
+        keyBuffer += e.key;
+      }
+    });
+
+    // Inward Stock Modal
+    function openAddBatchModal() {
+      document.getElementById('inPurchaseDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('inwardModal').classList.add('is-open');
+    }
+    function closeAddBatchModal() {
+      document.getElementById('inwardModal').classList.remove('is-open');
+    }
+
+    function handleInwardSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('inName').value.trim();
+      const category = document.getElementById('inCategory').value;
+      const supplier = document.getElementById('inSupplier').value.trim();
+      const barcode = document.getElementById('inBarcode').value.trim() || '890' + Math.floor(1000000000 + Math.random() * 9000000000);
+      const batch = document.getElementById('inBatch').value.trim();
+      const qty = parseInt(document.getElementById('inQty').value, 10);
+      const cost = parseFloat(document.getElementById('inCost').value);
+      const mrp = parseFloat(document.getElementById('inMrp').value);
+      const purchaseDate = document.getElementById('inPurchaseDate').value;
+      const expiryDate = document.getElementById('inExpiry').value;
+      const shelf = document.getElementById('inShelf').value.trim();
+
+      inventory.unshift({
+        id: 'SKU-' + Date.now().toString().slice(-4),
+        name,
+        category,
+        supplier,
+        barcode,
+        batch,
+        qty,
+        cost,
+        mrp,
+        purchaseDate,
+        expiryDate,
+        shelf,
+        frontShelf: false,
+        velocity: 3.5
+      });
+
+      saveDB();
+      closeAddBatchModal();
+      e.target.reset();
+      refreshAll();
+      showToast(currentLang === 'hi' ? 'नया स्टॉक दर्ज हुआ' : 'Inward Stock Saved', `${name} (#${batch}) added to shelf ledger.`);
+    }
+
+    // Missing Date Modal
+    function openDateModal(id) {
+      editingId = id;
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('editProdTitle').innerText = `${item.name} (#${item.batch})`;
+      document.getElementById('targetExpiryDate').value = getOffsetDate(30);
+      document.getElementById('updateExpiryModal').classList.add('is-open');
+    }
+    function closeUpdateExpiryModal() {
+      editingId = null;
+      document.getElementById('updateExpiryModal').classList.remove('is-open');
+    }
+
+    function commitUpdatedExpiry() {
+      const val = document.getElementById('targetExpiryDate').value;
+      if (!val) return;
+      const item = inventory.find(i => i.id === editingId);
+      if (item) {
+        item.expiryDate = val;
+        saveDB();
+        closeUpdateExpiryModal();
+        refreshAll();
+        showToast(currentLang === 'hi' ? 'तारीख सुरक्षित' : 'Expiry Date Set', `${item.name} expiry date updated.`);
+      }
+    }
+
+    // Toast Helper
+    function showToast(title, desc) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').innerText = title;
+      document.getElementById('toastDesc').innerText = desc;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 3400);
+    }
+
+    // Unified Tab Switcher (Syncs Desktop Topbar + Mobile Bottom Dock)
+    function switchTab(tabId) {
+      document.querySelectorAll('.workspace-panel').forEach(p => p.classList.remove('is-active'));
+      const target = document.getElementById(`panel-${tabId}`);
+      if (target) target.classList.add('is-active');
+
+      // Update Desktop Nav Links
+      document.querySelectorAll('.desktop-nav a').forEach(a => {
+        a.classList.toggle('is-active', a.dataset.tab === tabId);
+      });
+
+      // Update Mobile Bottom Dock Items
+      document.querySelectorAll('.mobile-bottom-dock .dock-item').forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.tab === tabId);
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (tabId === 'overview') renderOverview();
+      if (tabId === 'pos') renderPOSView();
+      if (tabId === 'stock') renderStockViews();
+    }
+
+    function refreshAll() {
+      renderOverview();
+      renderPOSView();
+      renderStockViews();
+      updateTicker();
+    }
+
+    // Spotlight Cursor Radial Glow (No 3D Tilt)
+    function attachSpotlightListeners() {
+      document.querySelectorAll('.card, .metric-card, .spotlight-card').forEach(el => {
+        if (el.dataset.spotBound) return;
+        el.dataset.spotBound = 'true';
+        el.addEventListener('pointermove', e => {
+          const rect = el.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          el.style.setProperty('--light-x', `${x}%`);
+          el.style.setProperty('--light-y', `${y}%`);
+        });
+      });
+    }
+
+    // Scroll Progress & Desktop Dynamic Island Contraction
+    function setupScroll() {
+      const header = document.getElementById('masthead');
+      const progress = document.getElementById('scrollProgress');
+      window.addEventListener('scroll', () => {
+        const y = window.scrollY || document.documentElement.scrollTop;
+        header.classList.toggle('is-scrolled', y > 30);
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+      }, { passive: true });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initDB();
+      setupScroll();
+      attachSpotlightListeners();
+      const savedLang = localStorage.getItem('kf_lang_mode') || 'en';
+      setLanguage(savedLang);
+    });
+  </script>
+</body>
+</html>
