@@ -55,14 +55,7 @@ Small and medium Kirana stores silently lose significant profit margins due to u
 ---
 
 ## 🛠 Architecture & Tech Stack
-┌────────────────────────────────────────────────────────┐
-│                   KiranaFlow AI Client                 │
-├─────────────────────┬───────────────────┬──────────────┤
-│    Presentation     │   Optical & Audio │  Persistence │
-│  Glassmorphic CSS3  │  MediaDevices API │ LocalStorage │
-│  Bento Grid Layout  │  Wedge Gun Hook   │  FIFO Engine │
-│  EN / हिन्दी Toggle  │   Web Audio API   │ Risk Matrix  │
-└─────────────────────┴───────────────────┴──────────────┘
+
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend Core** | Semantic HTML5, Modern CSS3 (Obsidian & Emerald Glassmorphism), Vanilla JS (ES6+) |
